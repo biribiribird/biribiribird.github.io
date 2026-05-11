@@ -1,3 +1,3 @@
 User-agent: *
 Disallow:
-Sitemap: https://biribiribird.github.io/sitemap.xml
+Sitemap: https://biribiribird.top/sitemap.xml

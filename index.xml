@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>BiribiriBird</title><link>https://biribiribird.github.io/</link><description>Recent content on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sun, 10 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>快速排序完全指南：从分治思想到工程优化</title><link>https://biribiribird.github.io/posts/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97%E4%BB%8E%E5%88%86%E6%B2%BB%E6%80%9D%E6%83%B3%E5%88%B0%E5%B7%A5%E7%A8%8B%E4%BC%98%E5%8C%96/</link><pubDate>Sun, 10 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.github.io/posts/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97%E4%BB%8E%E5%88%86%E6%B2%BB%E6%80%9D%E6%83%B3%E5%88%B0%E5%B7%A5%E7%A8%8B%E4%BC%98%E5%8C%96/</guid><description>&lt;h2 id="引言"&gt;引言&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>BiribiriBird</title><link>https://biribiribird.top/</link><description>Recent content on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sun, 10 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/index.xml" rel="self" type="application/rss+xml"/><item><title>快速排序完全指南：从分治思想到工程优化</title><link>https://biribiribird.top/posts/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97%E4%BB%8E%E5%88%86%E6%B2%BB%E6%80%9D%E6%83%B3%E5%88%B0%E5%B7%A5%E7%A8%8B%E4%BC%98%E5%8C%96/</link><pubDate>Sun, 10 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97%E4%BB%8E%E5%88%86%E6%B2%BB%E6%80%9D%E6%83%B3%E5%88%B0%E5%B7%A5%E7%A8%8B%E4%BC%98%E5%8C%96/</guid><description>&lt;h2 id="引言"&gt;引言&lt;/h2&gt;
 &lt;p&gt;快速排序（Quicksort）由 &lt;strong&gt;Tony Hoare&lt;/strong&gt; 于 1959 年提出，是最经典的分治算法之一。其核心思想可以用一句话概括：&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;选择一个 pivot，将数组划分为&amp;quot;小于 pivot&amp;quot;和&amp;quot;大于 pivot&amp;quot;两部分，然后递归处理子数组。&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="引言">引言</h2>
@@ -205,7 +205,7 @@ $$</p>
 <p>关键结论：<strong>快速排序仍是大多数标准库的首选通用排序</strong>，但几乎都加入了混合策略来避免最坏情况。</p>
 <hr>
 <p><em>本文共计约 2000 字，适合有一定算法基础的读者。如有疑问欢迎在评论区讨论。</em></p>
-]]></content:encoded></item><item><title>深度解析反向传播：从标量到张量的自动微分</title><link>https://biribiribird.github.io/posts/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E4%BB%8E%E6%A0%87%E9%87%8F%E5%88%B0%E5%BC%A0%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/</link><pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.github.io/posts/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E4%BB%8E%E6%A0%87%E9%87%8F%E5%88%B0%E5%BC%A0%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/</guid><description>&lt;h2 id="前言"&gt;前言&lt;/h2&gt;
+]]></content:encoded></item><item><title>深度解析反向传播：从标量到张量的自动微分</title><link>https://biribiribird.top/posts/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E4%BB%8E%E6%A0%87%E9%87%8F%E5%88%B0%E5%BC%A0%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/</link><pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E4%BB%8E%E6%A0%87%E9%87%8F%E5%88%B0%E5%BC%A0%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/</guid><description>&lt;h2 id="前言"&gt;前言&lt;/h2&gt;
 &lt;p&gt;反向传播（Backpropagation）是训练神经网络的核心算法。本文将深入探讨其数学本质——&lt;strong&gt;多元函数链式法则&lt;/strong&gt;的高效实现。&lt;/p&gt;
 &lt;h2 id="计算图视角下的链式法则"&gt;计算图视角下的链式法则&lt;/h2&gt;
 &lt;p&gt;考虑一个简单的三层网络：&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="前言">前言</h2>
@@ -432,7 +432,7 @@ $$</p>
 <p>反向传播的本质，就是把一个复杂函数的梯度计算分解为<strong>有向无环图上每个节点的局部雅可比乘积</strong>。掌握了这一点，也就掌握了所有现代深度学习框架的核心抽象。</p>
 <hr>
 <p><em>推荐阅读：《<a href="https://jax.readthedocs.io/en/latest/notebooks/autodiff_cookbook.html">The Autodiff Cookbook</a>》by JAX team</em></p>
-]]></content:encoded></item><item><title>Go 并发编程实战：Goroutine、Channel 与 Context 的优雅组合</title><link>https://biribiribird.github.io/posts/go-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98goroutinechannel-%E4%B8%8E-context-%E7%9A%84%E4%BC%98%E9%9B%85%E7%BB%84%E5%90%88/</link><pubDate>Fri, 08 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.github.io/posts/go-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98goroutinechannel-%E4%B8%8E-context-%E7%9A%84%E4%BC%98%E9%9B%85%E7%BB%84%E5%90%88/</guid><description>&lt;h2 id="开篇"&gt;开篇&lt;/h2&gt;
+]]></content:encoded></item><item><title>Go 并发编程实战：Goroutine、Channel 与 Context 的优雅组合</title><link>https://biribiribird.top/posts/go-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98goroutinechannel-%E4%B8%8E-context-%E7%9A%84%E4%BC%98%E9%9B%85%E7%BB%84%E5%90%88/</link><pubDate>Fri, 08 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/go-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98goroutinechannel-%E4%B8%8E-context-%E7%9A%84%E4%BC%98%E9%9B%85%E7%BB%84%E5%90%88/</guid><description>&lt;h2 id="开篇"&gt;开篇&lt;/h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Don&amp;rsquo;t communicate by sharing memory; share memory by communicating.&lt;/p&gt;
 &lt;p&gt;— &lt;em&gt;Effective Go&lt;/em&gt;&lt;/p&gt;
@@ -784,7 +784,7 @@ $$</p>
 <p>Go 的并发模型将 <strong>CSP</strong>（Communicating Sequential Processes）的思想带入了主流工程实践——<strong>用 channel 连接 goroutine，就是并发版的 Unix 管道</strong>。</p>
 <hr>
 <p><em>延伸阅读：<a href="https://go.dev/ref/mem">The Go Memory Model</a> | <a href="https://go.dev/blog/pipelines">Go Concurrency Patterns (2012)</a></em></p>
-]]></content:encoded></item><item><title>关于</title><link>https://biribiribird.github.io/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://biribiribird.github.io/about/</guid><description>&lt;h2 id="关于本站"&gt;关于本站&lt;/h2&gt;
+]]></content:encoded></item><item><title>关于</title><link>https://biribiribird.top/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://biribiribird.top/about/</guid><description>&lt;h2 id="关于本站"&gt;关于本站&lt;/h2&gt;
 &lt;p&gt;这里是 &lt;strong&gt;BiribiriBird&lt;/strong&gt; 的个人博客，主要记录编程、算法、系统设计方面的学习笔记。&lt;/p&gt;
 &lt;p&gt;建站的初衷很简单：写作是最好的思考方式。把模糊的理解写成清晰的文字，过程中自然会暴露盲区、理清思路。如果能顺便帮到正在读的你，那就更好了。&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="关于本站">关于本站</h2>
 <p>这里是 <strong>BiribiriBird</strong> 的个人博客，主要记录编程、算法、系统设计方面的学习笔记。</p>
@@ -802,7 +802,7 @@ $$</p>
 </ul>
 <h2 id="声明">声明</h2>
 <p>本站所有文章以 <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> 协议发布。转载请署名并附原文链接。文中观点仅代表个人，与技术社区和雇主无关。</p>
-]]></content:encoded></item><item><title>友链</title><link>https://biribiribird.github.io/links/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://biribiribird.github.io/links/</guid><description>&lt;h2 id="常去的地方"&gt;常去的地方&lt;/h2&gt;
+]]></content:encoded></item><item><title>友链</title><link>https://biribiribird.top/links/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://biribiribird.top/links/</guid><description>&lt;h2 id="常去的地方"&gt;常去的地方&lt;/h2&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
