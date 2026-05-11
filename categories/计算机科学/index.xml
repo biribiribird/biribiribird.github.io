@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>计算机科学 on BiribiriBird</title><link>http://localhost:1313/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/</link><description>Recent content in 计算机科学 on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sun, 10 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/index.xml" rel="self" type="application/rss+xml"/><item><title>快速排序完全指南：从分治思想到工程优化</title><link>http://localhost:1313/posts/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97%E4%BB%8E%E5%88%86%E6%B2%BB%E6%80%9D%E6%83%B3%E5%88%B0%E5%B7%A5%E7%A8%8B%E4%BC%98%E5%8C%96/</link><pubDate>Sun, 10 May 2026 00:00:00 +0000</pubDate><guid>http://localhost:1313/posts/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97%E4%BB%8E%E5%88%86%E6%B2%BB%E6%80%9D%E6%83%B3%E5%88%B0%E5%B7%A5%E7%A8%8B%E4%BC%98%E5%8C%96/</guid><description>&lt;h2 id="引言"&gt;引言&lt;/h2&gt;
+&lt;p&gt;快速排序（Quicksort）由 &lt;strong&gt;Tony Hoare&lt;/strong&gt; 于 1959 年提出，是最经典的分治算法之一。其核心思想可以用一句话概括：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;选择一个 pivot，将数组划分为&amp;quot;小于 pivot&amp;quot;和&amp;quot;大于 pivot&amp;quot;两部分，然后递归处理子数组。&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="引言">引言</h2>
+<p>快速排序（Quicksort）由 <strong>Tony Hoare</strong> 于 1959 年提出，是最经典的分治算法之一。其核心思想可以用一句话概括：</p>
+<blockquote>
+<p>选择一个 pivot，将数组划分为&quot;小于 pivot&quot;和&quot;大于 pivot&quot;两部分，然后递归处理子数组。</p>
+</blockquote>
+<p>这篇文章将从数学原理出发，结合 <code>Python</code> 实现，逐步深入工程中的优化技巧。</p>
+<h2 id="数学基础渐进复杂度分析">数学基础：渐进复杂度分析</h2>
+<p>快速排序的时间复杂度依赖于划分是否均匀。设 $T(n)$ 为对长度为 $n$ 的数组排序的期望时间，则有递推式：</p>
+<p>$$
+T(n) = \frac{1}{n} \sum_{k=0}^{n-1} \big[T(k) + T(n-k-1)\big] + \Theta(n)
+$$</p>
+<p>解此递推式可得期望时间复杂度为 $\Theta(n \log n)$。我们可以用积分近似来验证：</p>
+<p>$$
+\int_{1}^{n} x \ln x , dx \approx \frac{n^2 \ln n}{2} - \frac{n^2}{4}
+$$</p>
+<p>而最坏情况下，每次划分都极不均匀（例如已排序数组且总是选首元素为 pivot），退化至：</p>
+<p>$$
+T(n) = T(n-1) + \Theta(n) \implies T(n) = \Theta(n^2)
+$$</p>
+<h3 id="空间复杂度">空间复杂度</h3>
+<p>递归调用栈的深度在最好情况下为 $O(\log n)$，最坏情况下为 $O(n)$。通过<strong>尾递归优化</strong>可以将最坏空间降至 $O(\log n)$。</p>
+<h2 id="算法实现">算法实现</h2>
+<h3 id="基础版本lomuto-划分">基础版本：Lomuto 划分</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">quicksort_lomuto</span>(arr: list[int], low: int, high: int) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>    <span style="color:#e6db74">&#34;&#34;&#34;Lomuto partition scheme — 简单直观但交换次数较多&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>    <span style="color:#66d9ef">if</span> low <span style="color:#f92672">&gt;=</span> high:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>        <span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>    pivot <span style="color:#f92672">=</span> arr[high]           <span style="color:#75715e"># 选最后一个元素作为 pivot</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>    i <span style="color:#f92672">=</span> low <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>                 <span style="color:#75715e"># i 指向&#34;小于 pivot 的区域&#34;的末尾</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>    <span style="color:#66d9ef">for</span> j <span style="color:#f92672">in</span> range(low, high):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>        <span style="color:#66d9ef">if</span> arr[j] <span style="color:#f92672">&lt;</span> pivot:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>            i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>            arr[i], arr[j] <span style="color:#f92672">=</span> arr[j], arr[i]
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>    i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>    arr[i], arr[high] <span style="color:#f92672">=</span> arr[high], arr[i]  <span style="color:#75715e"># 将 pivot 放到正确位置</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>    quicksort_lomuto(arr, low, i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>    quicksort_lomuto(arr, i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, high)
+</span></span></code></pre></div><p>在 Python 中，还可以用更简洁的列表推导式：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">quicksort_pythonic</span>(arr: list[int]) <span style="color:#f92672">-&gt;</span> list[int]:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    <span style="color:#e6db74">&#34;&#34;&#34;Functional-style quicksort — NOT in-place&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#66d9ef">if</span> len(arr) <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">1</span>:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>        <span style="color:#66d9ef">return</span> arr
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    pivot <span style="color:#f92672">=</span> arr[len(arr) <span style="color:#f92672">//</span> <span style="color:#ae81ff">2</span>]
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>    left  <span style="color:#f92672">=</span> [x <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> arr <span style="color:#66d9ef">if</span> x <span style="color:#f92672">&lt;</span> pivot]
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>    mid   <span style="color:#f92672">=</span> [x <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> arr <span style="color:#66d9ef">if</span> x <span style="color:#f92672">==</span> pivot]
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8</span><span>    right <span style="color:#f92672">=</span> [x <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> arr <span style="color:#66d9ef">if</span> x <span style="color:#f92672">&gt;</span> pivot]
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9</span><span>    <span style="color:#66d9ef">return</span> quicksort_pythonic(left) <span style="color:#f92672">+</span> mid <span style="color:#f92672">+</span> quicksort_pythonic(right)
+</span></span></code></pre></div><h3 id="工程优化版本三路划分--插入排序混合">工程优化版本：三路划分 + 插入排序混合</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#75715e">// 三路划分 (Three-way Partition) —— 适合大量重复元素
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">quicksort_3way</span>(<span style="color:#66d9ef">int</span> arr[], <span style="color:#66d9ef">int</span> low, <span style="color:#66d9ef">int</span> high) {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>    <span style="color:#66d9ef">if</span> (low <span style="color:#f92672">&gt;=</span> high) <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    <span style="color:#75715e">// 小数组切换到插入排序
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>    <span style="color:#66d9ef">if</span> (high <span style="color:#f92672">-</span> low <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">16</span>) {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>        <span style="color:#a6e22e">insertion_sort</span>(arr <span style="color:#f92672">+</span> low, high <span style="color:#f92672">-</span> low <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>    }
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>    <span style="color:#66d9ef">int</span> lt <span style="color:#f92672">=</span> low, gt <span style="color:#f92672">=</span> high;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>    <span style="color:#66d9ef">int</span> pivot <span style="color:#f92672">=</span> arr[low];
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>    <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> low;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>    <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">&lt;=</span> gt) {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>        <span style="color:#66d9ef">if</span> (arr[i] <span style="color:#f92672">&lt;</span> pivot)      <span style="color:#a6e22e">swap</span>(arr <span style="color:#f92672">+</span> lt<span style="color:#f92672">++</span>, arr <span style="color:#f92672">+</span> i<span style="color:#f92672">++</span>);
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (arr[i] <span style="color:#f92672">&gt;</span> pivot) <span style="color:#a6e22e">swap</span>(arr <span style="color:#f92672">+</span> i, arr <span style="color:#f92672">+</span> gt<span style="color:#f92672">--</span>);
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>        <span style="color:#66d9ef">else</span>                     i<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19</span><span>    }
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21</span><span>    <span style="color:#a6e22e">quicksort_3way</span>(arr, low, lt <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22</span><span>    <span style="color:#a6e22e">quicksort_3way</span>(arr, gt <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, high);
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23</span><span>}
+</span></span></code></pre></div><h2 id="不同划分策略对比">不同划分策略对比</h2>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">策略</th>
+          <th style="text-align: left">pivot 选择</th>
+          <th style="text-align: left">最坏时间</th>
+          <th style="text-align: left">额外空间</th>
+          <th style="text-align: left">重复元素处理</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Lomuto</td>
+          <td style="text-align: left">固定末尾</td>
+          <td style="text-align: left">$O(n^2)$</td>
+          <td style="text-align: left">$O(1)$</td>
+          <td style="text-align: left">差</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Hoare</td>
+          <td style="text-align: left">固定中间</td>
+          <td style="text-align: left">$O(n^2)$</td>
+          <td style="text-align: left">$O(1)$</td>
+          <td style="text-align: left">一般</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>三路划分</strong></td>
+          <td style="text-align: left">固定首元素</td>
+          <td style="text-align: left">$O(n^2)$</td>
+          <td style="text-align: left">$O(1)$</td>
+          <td style="text-align: left"><strong>优秀</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left">IntroSort</td>
+          <td style="text-align: left">三数取中</td>
+          <td style="text-align: left">$O(n \log n)$</td>
+          <td style="text-align: left">$O(\log n)$</td>
+          <td style="text-align: left">良好</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">PDQSort</td>
+          <td style="text-align: left">多种启发式</td>
+          <td style="text-align: left">$O(n \log n)$</td>
+          <td style="text-align: left">$O(\log n)$</td>
+          <td style="text-align: left"><strong>极佳</strong></td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p><strong>备注</strong>：Rust 标准库的 <code>slice::sort_unstable</code> 使用 PDQSort（Pattern-Defeating Quicksort），它在检测到&quot;过于有序&quot;时会自动切换为堆排序。</p>
+</blockquote>
+<h2 id="性能基准测试">性能基准测试</h2>
+<p>使用 <code>Go</code> 的 <code>testing</code> 包对一百万条随机记录进行基准测试：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">BenchmarkQuicksort</span>(<span style="color:#a6e22e">b</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">testing</span>.<span style="color:#a6e22e">B</span>) {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>    <span style="color:#a6e22e">data</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">1_000_000</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">data</span> {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>        <span style="color:#a6e22e">data</span>[<span style="color:#a6e22e">i</span>] = <span style="color:#a6e22e">rand</span>.<span style="color:#a6e22e">Intn</span>(<span style="color:#ae81ff">1_000_000</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    }
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>    <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">ResetTimer</span>()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">N</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>        <span style="color:#a6e22e">copy</span> <span style="color:#f92672">:=</span> append([]int(<span style="color:#66d9ef">nil</span>), <span style="color:#a6e22e">data</span><span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>        <span style="color:#a6e22e">quicksort</span>(<span style="color:#a6e22e">copy</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>    }
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span><span style="color:#75715e">// BenchmarkQuicksort-16    4    286 ms/op</span>
+</span></span></code></pre></div><p><img alt="快速排序示意图" loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/6/6a/Sorting_quicksort_anim.gif"></p>
+<p><em>图：快速排序动画演示 (来源: Wikipedia)</em></p>
+<h2 id="实际应用场景">实际应用场景</h2>
+<p>下表总结了不同语言/库中快速排序的使用情况：</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">语言 / 库</th>
+          <th style="text-align: left">排序函数</th>
+          <th style="text-align: left">底层算法</th>
+          <th style="text-align: center">是否稳定</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">C++ <code>std::sort</code></td>
+          <td style="text-align: left"><code>std::sort</code></td>
+          <td style="text-align: left">Introsort</td>
+          <td style="text-align: center">✗</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Rust</td>
+          <td style="text-align: left"><code>slice::sort_unstable</code></td>
+          <td style="text-align: left">PDQSort</td>
+          <td style="text-align: center">✗</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Python</td>
+          <td style="text-align: left"><code>list.sort()</code></td>
+          <td style="text-align: left">Timsort (归并 + 插入)</td>
+          <td style="text-align: center">✓</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Java <code>Arrays.sort</code> (基本类型)</td>
+          <td style="text-align: left">Dual-Pivot Quicksort</td>
+          <td style="text-align: left">双轴快排</td>
+          <td style="text-align: center">✗</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Go</td>
+          <td style="text-align: left"><code>sort.Slice</code></td>
+          <td style="text-align: left">PDQSort (≥1.21)</td>
+          <td style="text-align: center">✗</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">JavaScript V8</td>
+          <td style="text-align: left"><code>Array.prototype.sort</code></td>
+          <td style="text-align: left">Timsort</td>
+          <td style="text-align: center">✓</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="小结">小结</h2>
+<p>在这篇文章中，我们涵盖了：</p>
+<ol>
+<li>快速排序的递推式 <strong>$T(n)$</strong> 及其数学分析</li>
+<li>三种不同风格的代码实现：<code>Lomuto</code>、<code>Pythonic</code>、<code>三路划分 C</code></li>
+<li>不同 pivot 选择策略的性能对比</li>
+<li>各主流语言标准库的排序算法选择</li>
+</ol>
+<p>关键结论：<strong>快速排序仍是大多数标准库的首选通用排序</strong>，但几乎都加入了混合策略来避免最坏情况。</p>
+<hr>
+<p><em>本文共计约 2000 字，适合有一定算法基础的读者。如有疑问欢迎在评论区讨论。</em></p>
+]]></content:encoded></item></channel></rss>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>深度学习 on BiribiriBird</title><link>http://localhost:1313/series/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</link><description>Recent content in 深度学习 on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sat, 09 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/series/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/index.xml" rel="self" type="application/rss+xml"/><item><title>深度解析反向传播：从标量到张量的自动微分</title><link>http://localhost:1313/posts/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E4%BB%8E%E6%A0%87%E9%87%8F%E5%88%B0%E5%BC%A0%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/</link><pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate><guid>http://localhost:1313/posts/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E4%BB%8E%E6%A0%87%E9%87%8F%E5%88%B0%E5%BC%A0%E9%87%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/</guid><description>&lt;h2 id="前言"&gt;前言&lt;/h2&gt;
+&lt;p&gt;反向传播（Backpropagation）是训练神经网络的核心算法。本文将深入探讨其数学本质——&lt;strong&gt;多元函数链式法则&lt;/strong&gt;的高效实现。&lt;/p&gt;
+&lt;h2 id="计算图视角下的链式法则"&gt;计算图视角下的链式法则&lt;/h2&gt;
+&lt;p&gt;考虑一个简单的三层网络：&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="前言">前言</h2>
+<p>反向传播（Backpropagation）是训练神经网络的核心算法。本文将深入探讨其数学本质——<strong>多元函数链式法则</strong>的高效实现。</p>
+<h2 id="计算图视角下的链式法则">计算图视角下的链式法则</h2>
+<p>考虑一个简单的三层网络：</p>
+<p>$$
+\begin{aligned}
+z_1 &amp;= W_1 x + b_1 \
+a_1 &amp;= \sigma(z_1) \
+z_2 &amp;= W_2 a_1 + b_2 \
+\hat{y} &amp;= \text{softmax}(z_2) \
+\mathcal{L} &amp;= -\sum_{k} y_k \log \hat{y}_k
+\end{aligned}
+$$</p>
+<p>对应的计算图如下：</p>
+<p><img alt="前向计算图" loading="lazy" src="https://pica.zhimg.com/v2-7f99f96fd160d7dbb11ef12f0c7ead96_1440w.jpg"></p>
+<h3 id="标量反向传播">标量反向传播</h3>
+<p>对于标量函数 $f(g(h(x)))$，链式法则给出：</p>
+<p>$$
+\frac{df}{dx} = \frac{df}{dg} \cdot \frac{dg}{dh} \cdot \frac{dh}{dx}
+$$</p>
+<p>以 <code>Sigmoid</code> 激活函数为例，其导数的简洁形式是一个经典技巧点：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sigmoid</span>(x: float) <span style="color:#f92672">-&gt;</span> float:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    s <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span> <span style="color:#f92672">/</span> (<span style="color:#ae81ff">1.0</span> <span style="color:#f92672">+</span> math<span style="color:#f92672">.</span>exp(<span style="color:#f92672">-</span>x))
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#66d9ef">return</span> s
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sigmoid_backward</span>(d_out: float, s: float) <span style="color:#f92672">-&gt;</span> float:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>    <span style="color:#75715e"># sigmoid 导数: sigma(x) * (1 - sigma(x))</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>    <span style="color:#66d9ef">return</span> d_out <span style="color:#f92672">*</span> s <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1.0</span> <span style="color:#f92672">-</span> s)
+</span></span></code></pre></div><h2 id="矩阵张量反向传播">矩阵/张量反向传播</h2>
+<p>当推广到矩阵时，维度一致性是关键。对于矩阵乘法 $Y = XW$：</p>
+<p>$$
+\frac{\partial \mathcal{L}}{\partial X} = \frac{\partial \mathcal{L}}{\partial Y} \cdot W^T
+$$</p>
+<p>$$
+\frac{\partial \mathcal{L}}{\partial W} = X^T \cdot \frac{\partial \mathcal{L}}{\partial Y}
+$$</p>
+<p>这里的 <code>·</code> 表示矩阵乘法。在实际框架中，这些梯度由 <strong>autograd 引擎</strong> 自动计算。</p>
+<h3 id="pytorch-实战自定义-autograd-function">PyTorch 实战：自定义 Autograd Function</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#f92672">import</span> torch
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span><span style="color:#f92672">from</span> torch.autograd <span style="color:#f92672">import</span> Function
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyLinear</span>(Function):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    <span style="color:#e6db74">&#34;&#34;&#34;自定义线性层的前向与反向传播&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forward</span>(ctx, input, weight, bias<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>        <span style="color:#75715e"># 保存反向所需变量</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>        ctx<span style="color:#f92672">.</span>save_for_backward(input, weight, bias)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>        output <span style="color:#f92672">=</span> input<span style="color:#f92672">.</span>mm(weight<span style="color:#f92672">.</span>t())
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>        <span style="color:#66d9ef">if</span> bias <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>            output <span style="color:#f92672">+=</span> bias<span style="color:#f92672">.</span>unsqueeze(<span style="color:#ae81ff">0</span>)<span style="color:#f92672">.</span>expand_as(output)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>        <span style="color:#66d9ef">return</span> output
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">backward</span>(ctx, grad_output):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>        input, weight, bias <span style="color:#f92672">=</span> ctx<span style="color:#f92672">.</span>saved_tensors
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19</span><span>        grad_input <span style="color:#f92672">=</span> grad_weight <span style="color:#f92672">=</span> grad_bias <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21</span><span>        <span style="color:#75715e"># 根据链式法则计算各梯度</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22</span><span>        <span style="color:#66d9ef">if</span> ctx<span style="color:#f92672">.</span>needs_input_grad[<span style="color:#ae81ff">0</span>]:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23</span><span>            grad_input <span style="color:#f92672">=</span> grad_output<span style="color:#f92672">.</span>mm(weight)        <span style="color:#75715e"># dL/dX = dL/dY · W</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24</span><span>        <span style="color:#66d9ef">if</span> ctx<span style="color:#f92672">.</span>needs_input_grad[<span style="color:#ae81ff">1</span>]:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25</span><span>            grad_weight <span style="color:#f92672">=</span> grad_output<span style="color:#f92672">.</span>t()<span style="color:#f92672">.</span>mm(input)    <span style="color:#75715e"># dL/dW = Y_grad^T · X</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26</span><span>        <span style="color:#66d9ef">if</span> bias <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span> <span style="color:#f92672">and</span> ctx<span style="color:#f92672">.</span>needs_input_grad[<span style="color:#ae81ff">2</span>]:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27</span><span>            grad_bias <span style="color:#f92672">=</span> grad_output<span style="color:#f92672">.</span>sum(<span style="color:#ae81ff">0</span>)             <span style="color:#75715e"># dL/db = sum(dL/dY, dim=0)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29</span><span>        <span style="color:#66d9ef">return</span> grad_input, grad_weight, grad_bias
+</span></span></code></pre></div><p>调试梯度时，数值梯度检查（<code>torch.autograd.gradcheck</code>）是必不可少的工具：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75715e"># 使用 gradcheck 验证自定义反向传播</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>$ python -c <span style="color:#e6db74">&#34;
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#e6db74">import torch
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#e6db74">from my_linear import MyLinear
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span><span style="color:#e6db74">input = torch.randn(20, 10, dtype=torch.double, requires_grad=True)
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span><span style="color:#e6db74">weight = torch.randn(5, 10, dtype=torch.double, requires_grad=True)
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span><span style="color:#e6db74">torch.autograd.gradcheck(MyLinear.apply, (input, weight), eps=1e-6, atol=1e-4)
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8</span><span><span style="color:#e6db74">print(&#39;Gradient check passed!&#39;)
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9</span><span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><h2 id="激活函数对比">激活函数对比</h2>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">激活函数</th>
+          <th style="text-align: left">公式</th>
+          <th style="text-align: left">导数值域</th>
+          <th style="text-align: left">优点</th>
+          <th style="text-align: left">缺点</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">Sigmoid</td>
+          <td style="text-align: left">$\sigma(x) = \frac{1}{1+e^{-x}}$</td>
+          <td style="text-align: left">$(0, 0.25]$</td>
+          <td style="text-align: left">平滑、有界</td>
+          <td style="text-align: left">梯度消失</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Tanh</td>
+          <td style="text-align: left">$\tanh(x) = \frac{e^x-e^{-x}}{e^x+e^{-x}}$</td>
+          <td style="text-align: left">$(0, 1]$</td>
+          <td style="text-align: left">零中心化</td>
+          <td style="text-align: left">梯度消失</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>ReLU</strong></td>
+          <td style="text-align: left">$f(x)=\max(0,x)$</td>
+          <td style="text-align: left">${0, 1}$</td>
+          <td style="text-align: left">计算快、缓解梯度消失</td>
+          <td style="text-align: left">Dead Neuron</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>GELU</strong></td>
+          <td style="text-align: left">$x \cdot \Phi(x)$</td>
+          <td style="text-align: left">$\approx (0, 1]$</td>
+          <td style="text-align: left">平滑、概率解释</td>
+          <td style="text-align: left">计算略贵</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SwiGLU</td>
+          <td style="text-align: left">$x \cdot \sigma(\beta x)$</td>
+          <td style="text-align: left">—</td>
+          <td style="text-align: left">LLM 标配</td>
+          <td style="text-align: left">参数量翻倍</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p><strong>Why GELU?</strong> GELU（Gaussian Error Linear Unit）在 Transformer 架构中表现优异，因为它是 ReLU 的平滑近似——对每个输入应用一个由标准正态 CDF $\Phi(x)$ 决定的&quot;门控概率&quot;。</p>
+</blockquote>
+<h2 id="常见问题排查清单">常见问题排查清单</h2>
+<p>在实践中，反向传播的调试常有以下痛点：</p>
+<ol>
+<li><strong>梯度爆炸</strong>（Gradient Explosion）：损失突然变成 <code>NaN</code>
+<ul>
+<li>使用 <code>torch.nn.utils.clip_grad_norm_</code> 进行梯度裁剪</li>
+<li>检查学习率是否过大</li>
+</ul>
+</li>
+<li><strong>梯度消失</strong>（Vanishing Gradient）：loss 几乎不下降
+<ul>
+<li>换用 ReLU / GELU 替代 Sigmoid</li>
+<li>添加 BatchNorm / LayerNorm</li>
+</ul>
+</li>
+<li><strong>形状不匹配</strong>（Shape Mismatch）：<code>RuntimeError: shape '[64, 10]' is invalid for input of size 1280</code>
+<ul>
+<li>仔细追踪 <code>forward</code> 中每一步的 tensor shape</li>
+<li>善用 <code>.view()</code> / <code>.reshape()</code> / <code>.flatten()</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="现代框架的计算图范式对比">现代框架的计算图范式对比</h2>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">框架</th>
+          <th style="text-align: left">图构建方式</th>
+          <th style="text-align: center">动态图</th>
+          <th style="text-align: left">分布式策略</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">PyTorch</td>
+          <td style="text-align: left">Define-by-Run</td>
+          <td style="text-align: center">✓</td>
+          <td style="text-align: left">DDP / FSDP</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">TensorFlow 2.x</td>
+          <td style="text-align: left">Eager + tf.function</td>
+          <td style="text-align: center">✓</td>
+          <td style="text-align: left">MirroredStrategy</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">JAX</td>
+          <td style="text-align: left">函数式 + grad()/vmap()</td>
+          <td style="text-align: center">✓</td>
+          <td style="text-align: left">pmap() / pjit</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">Flux.jl (Julia)</td>
+          <td style="text-align: left">原生 Julia 自动微分</td>
+          <td style="text-align: center">✓</td>
+          <td style="text-align: left">—</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="总结">总结</h2>
+<p>我们用一张表回顾核心概念：</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">概念</th>
+          <th style="text-align: left">符号</th>
+          <th style="text-align: left">直觉理解</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">前向传播</td>
+          <td style="text-align: left">$x \mapsto f(x)$</td>
+          <td style="text-align: left">从输入计算输出</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">反向传播</td>
+          <td style="text-align: left">$\frac{\partial \mathcal{L}}{\partial x}$</td>
+          <td style="text-align: left">回答&quot;改变 $x$ 会如何影响最终损失？&quot;</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">梯度累积</td>
+          <td style="text-align: left">$\sum \nabla$</td>
+          <td style="text-align: left">用 micro-batch 模拟大 batch</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">链式法则</td>
+          <td style="text-align: left">$\frac{\partial z}{\partial x} = \frac{\partial z}{\partial y} \frac{\partial y}{\partial x}$</td>
+          <td style="text-align: left">将复杂梯度分解为简单梯度的乘积</td>
+      </tr>
+  </tbody>
+</table>
+<p>反向传播的本质，就是把一个复杂函数的梯度计算分解为<strong>有向无环图上每个节点的局部雅可比乘积</strong>。掌握了这一点，也就掌握了所有现代深度学习框架的核心抽象。</p>
+<hr>
+<p><em>推荐阅读：《<a href="https://jax.readthedocs.io/en/latest/notebooks/autodiff_cookbook.html">The Autodiff Cookbook</a>》by JAX team</em></p>
+]]></content:encoded></item></channel></rss>
