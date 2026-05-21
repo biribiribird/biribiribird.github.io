@@ -29,19 +29,19 @@
 <p>非常激进</p>
 </blockquote>
 <p>可以对于配置文件进行手动配置命令</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span>{
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>  &#34;permissions&#34;: {
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>    &#34;allow&#34;: [
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>      // 自动允许，不询问
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    ],
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>    &#34;ask&#34;: [
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>      // 执行前询问确认
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>    ],
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>    &#34;deny&#34;: [
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>      // 完全禁止
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>    ]
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>  }
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">{
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  &#34;permissions&#34;: {
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    &#34;allow&#34;: [
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">      // 自动允许，不询问
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    ],
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    &#34;ask&#34;: [
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">      // 执行前询问确认
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    ],
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    &#34;deny&#34;: [
+</span></span><span class="line"><span class="ln">10</span><span class="cl">      // 完全禁止
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    ]
+</span></span><span class="line"><span class="ln">12</span><span class="cl">  }
+</span></span><span class="line"><span class="ln">13</span><span class="cl">}
 </span></span></code></pre></div><h3 id="后台">后台</h3>
 <p><code>ctrl+b</code>可以将当前正在执行的task放到后台</p>
 <p>然后我们可以继续聊，同时<code>/tasks</code>可以看当前后台任务</p>
@@ -64,16 +64,16 @@
 <p><code>/context</code> 查看上下文使用情况</p>
 <p>建议通过<code>.claudeignore</code>决定哪些文件不放入claude，节省token</p>
 <p>大型项目可以通过rules目录</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span>.claude/
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>├── settings.json          # 主配置文件
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>├── CLAUDE.md              # 项目概述（仍需要）
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>└── rules/                 # 规则目录
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    ├── 00-security.md     # 安全规则（全局）
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>    ├── 01-coding-style.md # 编码风格（全局）
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>    ├── 10-api.md          # API 开发规范
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>    ├── 11-frontend.md     # 前端开发规范
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>    ├── 12-backend.md      # 后端开发规范
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>    └── 20-testing.md      # 测试规范
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">.claude/
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">├── settings.json          # 主配置文件
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">├── CLAUDE.md              # 项目概述（仍需要）
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">└── rules/                 # 规则目录
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    ├── 00-security.md     # 安全规则（全局）
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    ├── 01-coding-style.md # 编码风格（全局）
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    ├── 10-api.md          # API 开发规范
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    ├── 11-frontend.md     # 前端开发规范
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    ├── 12-backend.md      # 后端开发规范
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    └── 20-testing.md      # 测试规范
 </span></span></code></pre></div><hr>
 <ul>
 <li>Agent Skill

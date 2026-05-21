@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Agent on BiribiriBird</title><link>https://biribiribird.top/tags/agent/</link><description>Recent content in Agent on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 21 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/tags/agent/index.xml" rel="self" type="application/rss+xml"/><item><title>Anthropic - Building Effective Agents</title><link>https://biribiribird.top/posts/anthropic-building-effective-agents/</link><pubDate>Thu, 21 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/anthropic-building-effective-agents/</guid><description>&lt;h2 id="what"&gt;What&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Workflow&lt;/code&gt;和&lt;code&gt;Agent&lt;/code&gt;的差异还是很大的&lt;/p&gt;
+&lt;p&gt;Antropic将其都归纳为一个&lt;code&gt;Agentic Systems&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Workflow：由代码决定每一步应该做什么，LLM只是其中的一环&lt;/li&gt;
+&lt;li&gt;Agent：LLM自主决定每一步应该做什么&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="when-and-when-not"&gt;When and When Not&lt;/h2&gt;
+&lt;h3 id="timing"&gt;Timing&lt;/h3&gt;
+&lt;p&gt;Antropic并不建议什么情况下都去做一个复杂的&lt;code&gt;Agentic System&lt;/code&gt;&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="what">What</h2>
+<p><code>Workflow</code>和<code>Agent</code>的差异还是很大的</p>
+<p>Antropic将其都归纳为一个<code>Agentic Systems</code></p>
+<ul>
+<li>Workflow：由代码决定每一步应该做什么，LLM只是其中的一环</li>
+<li>Agent：LLM自主决定每一步应该做什么</li>
+</ul>
+<h2 id="when-and-when-not">When and When Not</h2>
+<h3 id="timing">Timing</h3>
+<p>Antropic并不建议什么情况下都去做一个复杂的<code>Agentic System</code></p>
+<p>应该先尝试最简单的方案，再逐渐增加复杂度</p>
+<ul>
+<li>质量上升的同时，成本、延迟也会逐渐上升</li>
+</ul>
+<p>决策顺序</p>
+<ul>
+<li>第一层：单次LLM调用
+<ul>
+<li>多数应用 retrieval and in-context examples就足够了</li>
+</ul>
+</li>
+<li>第二层：Workflow
+<ul>
+<li>任务步骤多、且明确、可预期</li>
+</ul>
+</li>
+<li>第三层：Agents
+<ul>
+<li>任务需要灵活决策</li>
+<li>任务没有固定路径，需要动态决定每一步</li>
+<li>成本上升、难以预测、响应慢</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>帮我调研某个市场，找出潜在客户，比较竞品，并输出进入策略。</p>
+</blockquote>
+<p>复杂度是需要有收益的</p>
+<h3 id="frameworks">Frameworks</h3>
+<p>当简单的方案足够解决问题时，复杂的框架可能会带来不必要的复杂性</p>
+<p>能够通过LLM API直接实现，就尽量不要做太多事情</p>
+<p>使用框架应该确保能够理解底层代码</p>
+<h2 id="building-blocks-workflows-and-agents">Building Blocks, Workflows, and Agents</h2>
+<p>从简单的组合工作流到自主智能体</p>
+<h3 id="block">Block</h3>
+<p>定义为<strong>一个能够调用外部能力的最小单元</strong></p>
+<p>augmented LLM = LLM + 增强能力</p>
+<ul>
+<li>检索能力</li>
+<li>工具调用</li>
+<li>记忆读写</li>
+</ul>
+<p>或者说是一个增强的LLM，<code>The Augmented LLM</code></p>
+<p>不管是workflow还是agent，都需要其作为最小单元进行组成</p>
+<p><img alt="Block:The augmented LLM" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521174411267.png"></p>
+<blockquote>
+<p>Block并不等于Agent。取决于外层组织方式</p>
+</blockquote>
+<ul>
+<li>总结这篇文章：系统让LLM检索文章内容并且总结（Block）</li>
+<li>完成调研：LLM需要先决定要查询资料、整理资料、总结分析，在这个基础上开始决定查什么资料、调用什么、多轮分析给出完整报告（Agent）</li>
+</ul>
+<p>总结一下：</p>
+<ul>
+<li><strong>裸 LLM</strong>：只根据 prompt 输出文本</li>
+<li><strong>增强型 LLM</strong>：可以检索、调用工具、使用记忆</li>
+<li><strong>Workflow</strong>：把多个增强型 LLM 调用按固定结构组织起来</li>
+<li><strong>Agent</strong>：让增强型 LLM 在循环中自主规划、调用工具、根据反馈调整</li>
+</ul>
+<blockquote>
+<ul>
+<li>增强LLM：针对当前任务，自己决定需要检索什么、调用什么……完成单次任务</li>
+<li>Agent：具备任务流程基本的控制权，能够决定整个任务如何继续推进</li>
+</ul>
+</blockquote>
+<br>
+<br>
+<p>构建这样的LLM需要：</p>
+<ul>
+<li>明确LLM工具集，应该接近任务本身</li>
+<li>LLM工具接口简要、清晰、文档明确</li>
+</ul>
+<blockquote>
+<p>例如：MCP</p>
+</blockquote>
+<br>
+<br>
+<p>后文提到的所有workflow和agent，每次LLM调用都默认是带有检索、工具、记忆能力的augmented LLM</p>
+<h3 id="workflow">Workflow</h3>
+]]></content:encoded></item></channel></rss>
