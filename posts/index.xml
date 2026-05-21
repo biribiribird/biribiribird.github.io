@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on BiribiriBird</title><link>https://biribiribird.top/posts/</link><description>Recent content in Posts on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 21 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Anthropic - Building Effective Agents</title><link>https://biribiribird.top/posts/anthropic-building-effective-agents/</link><pubDate>Thu, 21 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/anthropic-building-effective-agents/</guid><description>&lt;h2 id="what"&gt;What&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on BiribiriBird</title><link>https://biribiribird.top/posts/</link><description>Recent content in Posts on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 21 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Anthropic - Building Effective Agents</title><link>https://biribiribird.top/posts/anthropic-building-effective-agents/</link><pubDate>Thu, 21 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/anthropic-building-effective-agents/</guid><description>&lt;h1 id="what"&gt;What&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;Workflow&lt;/code&gt;和&lt;code&gt;Agent&lt;/code&gt;的差异还是很大的&lt;/p&gt;
 &lt;p&gt;Antropic将其都归纳为一个&lt;code&gt;Agentic Systems&lt;/code&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Workflow：由代码决定每一步应该做什么，LLM只是其中的一环&lt;/li&gt;
 &lt;li&gt;Agent：LLM自主决定每一步应该做什么&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id="when-and-when-not"&gt;When and When Not&lt;/h2&gt;
-&lt;h3 id="timing"&gt;Timing&lt;/h3&gt;
-&lt;p&gt;Antropic并不建议什么情况下都去做一个复杂的&lt;code&gt;Agentic System&lt;/code&gt;&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="what">What</h2>
+&lt;h1 id="when-and-when-not"&gt;When and When Not&lt;/h1&gt;
+&lt;h2 id="timing"&gt;Timing&lt;/h2&gt;
+&lt;p&gt;Antropic并不建议什么情况下都去做一个复杂的&lt;code&gt;Agentic System&lt;/code&gt;&lt;/p&gt;</description><content:encoded><![CDATA[<h1 id="what">What</h1>
 <p><code>Workflow</code>和<code>Agent</code>的差异还是很大的</p>
 <p>Antropic将其都归纳为一个<code>Agentic Systems</code></p>
 <ul>
 <li>Workflow：由代码决定每一步应该做什么，LLM只是其中的一环</li>
 <li>Agent：LLM自主决定每一步应该做什么</li>
 </ul>
-<h2 id="when-and-when-not">When and When Not</h2>
-<h3 id="timing">Timing</h3>
+<h1 id="when-and-when-not">When and When Not</h1>
+<h2 id="timing">Timing</h2>
 <p>Antropic并不建议什么情况下都去做一个复杂的<code>Agentic System</code></p>
 <p>应该先尝试最简单的方案，再逐渐增加复杂度</p>
 <ul>
@@ -45,13 +45,13 @@
 <p>帮我调研某个市场，找出潜在客户，比较竞品，并输出进入策略。</p>
 </blockquote>
 <p>复杂度是需要有收益的</p>
-<h3 id="frameworks">Frameworks</h3>
+<h2 id="frameworks">Frameworks</h2>
 <p>当简单的方案足够解决问题时，复杂的框架可能会带来不必要的复杂性</p>
 <p>能够通过LLM API直接实现，就尽量不要做太多事情</p>
 <p>使用框架应该确保能够理解底层代码</p>
-<h2 id="building-blocks-workflows-and-agents">Building Blocks, Workflows, and Agents</h2>
+<h1 id="building-blocks-workflows-and-agents">Building Blocks, Workflows, and Agents</h1>
 <p>从简单的组合工作流到自主智能体</p>
-<h3 id="block">Block</h3>
+<h2 id="block">Block</h2>
 <p>定义为<strong>一个能够调用外部能力的最小单元</strong></p>
 <p>augmented LLM = LLM + 增强能力</p>
 <ul>
@@ -86,7 +86,7 @@
 <br>
 <p>构建这样的LLM需要：</p>
 <ul>
-<li>明确LLM工具集，应该接近任务本身</li>
+<li>明确LLM工具集，应该接近任务本身，不要给无关的工具</li>
 <li>LLM工具接口简要、清晰、文档明确</li>
 </ul>
 <blockquote>
@@ -95,7 +95,204 @@
 <br>
 <br>
 <p>后文提到的所有workflow和agent，每次LLM调用都默认是带有检索、工具、记忆能力的augmented LLM</p>
-<h3 id="workflow">Workflow</h3>
+<h2 id="workflow">Workflow</h2>
+<p>workflow并不是简单地多次调用模型</p>
+<p>每次模型调用都应该有清晰的输入、职责、可用能力</p>
+<p>提供五种workflow设计模式</p>
+<h3 id="workflow1-prompt-chaining">Workflow1: Prompt Chaining</h3>
+<p>最简单的workflow，数据沿着链条通过每一个LLM的prompt</p>
+<p><img alt="Prompt Chain" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521202901846.png"></p>
+<p>任务能够被切分为顺序的一系列步骤</p>
+<p>每个LLM处理前一个LLM的输出</p>
+<p>可以在任意步骤之间添加一个Gate，保证任务正常流动</p>
+<p>具备以下特点的任务常使用此workflow</p>
+<ul>
+<li>任务可以轻松且清晰地分解为固定子任务</li>
+<li>能够通过让LLM每次处理更简单的子任务，以延迟换取更高的准确性</li>
+</ul>
+<blockquote>
+<p>任务示例</p>
+<ul>
+<li>生成营销文案，然后将其翻译成另一种语言。</li>
+<li>撰写文档大纲，检查大纲是否符合特定标准，然后基于大纲撰写文档。</li>
+</ul>
+</blockquote>
+<br>
+<h3 id="workflow2-routing">Workflow2: Routing</h3>
+<p>在纯Chain的基础上增加了一些分支结构</p>
+<p>显然有时候单份提示词并不能充分完成一个任务</p>
+<p>或许我们可以对任务进行分类，不同类型任务使用不同提示词完成</p>
+<p><img alt="Routing" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521203919488.png"></p>
+<ul>
+<li>按任务类型进行分类：使用不同提示词</li>
+<li>按任务难度进行分类：使用不同模型节约成本</li>
+</ul>
+<br>
+<h3 id="workflow3-parallelization">Workflow3: Parallelization</h3>
+<ul>
+<li>如果能将任务拆分成<strong>独立的子任务</strong></li>
+<li>希望获取同一任务的<strong>多样化输出结果（投票）</strong></li>
+</ul>
+<p>那么我们可以并行化</p>
+<p><img alt="Parallelization" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521205400113.png"></p>
+<blockquote>
+<ul>
+<li>独立子任务
+<ul>
+<li>一个LLM处理查询</li>
+<li>一个LLM处理安全审核与防护</li>
+</ul>
+</li>
+<li>Voting
+<ul>
+<li>使用多个不同提示进行code review</li>
+<li>多个提示词不同方面or不同阈值做评估</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<br>
+<h3 id="workflow4-orchestrator-workers">Workflow4: Orchestrator-workers</h3>
+<p>似乎就是<strong>Planner</strong></p>
+<p>当子任务无法预先定义的时候，我们可以考虑设置一个<code>Orchestrator</code>做分工</p>
+<blockquote>
+<p>Orchestrator：管弦乐演奏家；管弦乐编曲家</p>
+<p>可以理解为编排器、指挥、协调器</p>
+</blockquote>
+<p><img alt="Orchestrator-workers" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521205906617.png"></p>
+<p>与并行化最大的区别：子任务由协调器根据具体输入动态确定</p>
+<blockquote>
+<ul>
+<li>对多个文件进行复杂修改
+<ul>
+<li>需要分工出不同线路对不同文件单独做不同修改</li>
+</ul>
+</li>
+<li>从多个来源做信息搜集</li>
+</ul>
+</blockquote>
+<p>这里会觉得像Agent？</p>
+<p>但是仍然是定死了先编排，再分工</p>
+<p>Agent可以自己决定使用哪一套workflow与任务安排</p>
+<br>
+<h3 id="workflow5-evaluator-optimizer">Workflow5: Evaluator-optimizer</h3>
+<p>似乎就是<strong>Reflection</strong></p>
+<p>一个 LLM 调用生成响应，而另一个则在循环中提供评估和反馈</p>
+<p><img alt="Evaluator-optimizer" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521210236279.png"></p>
+<ul>
+<li>拥有明确的评估标准，迭代可以带来价值优化
+<ul>
+<li>人类能为LLM输出提供反馈</li>
+<li>LLM能通过人类反馈进行打磨提升</li>
+</ul>
+</li>
+</ul>
+<p>满足这两个条件，就可以考虑让模型做评估优化</p>
+<blockquote>
+<ul>
+<li>文学翻译：LLM不断发现细微之处进行改进</li>
+<li>多轮搜索：LLM决定是否继续搜索</li>
+</ul>
+</blockquote>
+<h2 id="agent">Agent</h2>
+<ul>
+<li>Step1：根据人类指令或互动讨论开始工作</li>
+<li>Step2：<strong>自主规划</strong>，开始运作（必要时返回给人类）</li>
+<li>Step3：执行过程中，必须从<strong>每个步骤处</strong>获取真实情况（工具调用结果or代码执行结果），评估进展
+<ul>
+<li>在检查点or障碍处进行暂停，询问人类</li>
+</ul>
+</li>
+<li>任务完后终止，或设置停止条件（例如最大迭代次数）</li>
+</ul>
+<p><img alt="Agent" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521212205507.png"></p>
+<p>何时使用：</p>
+<ul>
+<li>难以预测步骤数量</li>
+<li>无法硬编码固定路径</li>
+<li>开放问题</li>
+</ul>
+<p>同时：Agent高度自主，因此最好在沙盒中，设置防护措施</p>
+<p>防止错误累积</p>
+<blockquote>
+<p>核心：基于<strong>环境反馈</strong>循环使用<strong>工具</strong></p>
+</blockquote>
+<p>因此工具集和文档的设计至关重要</p>
+<hr>
+<h1 id="summary">Summary</h1>
+<h2 id="combining-and-customizing">Combining and Customizing</h2>
+<p>其实不需要过度在意所谓的规范，应该根据实际场景使用具体范式</p>
+<p>关键：衡量性能与实现</p>
+<p>只有能切实改善结果时，才会增加系统复杂性</p>
+<h2 id="principles">Principles</h2>
+<p>从简单的提示词开始，通过全面评估进行优化</p>
+<p>遵守三项原则</p>
+<ul>
+<li>简洁性</li>
+<li>透明度：展示智能体的规划步骤</li>
+<li>把工具设计成模型容易理解、容易正确使用、容易从错误中恢复的形式
+<ul>
+<li>一定要方便调试</li>
+</ul>
+</li>
+</ul>
+<h1 id="appendix">Appendix</h1>
+<h2 id="customer-support">Customer support</h2>
+<p>与客户交互天然适合使用Agent，非常推荐从chatbot升级到agent</p>
+<ul>
+<li>客服：天然是聊天界面</li>
+<li>agent 比普通 chatbot 多了工具能力</li>
+</ul>
+<p>同时agent通过与客户交互过程中了解用户需求，明确动作</p>
+<ul>
+<li>对于客户数据、订单历史记录和知识库文章
+<ul>
+<li>可以通过工具调用进行获取，获取信息后作为上下文</li>
+<li>但这里的操作比较松弛</li>
+</ul>
+</li>
+<li>对于退款、更新工单等<strong>写操作</strong>
+<ul>
+<li>非常危险，需要由业务代码进行校验</li>
+<li>应当设计一个代码接口（内部需要进行非常严格的参数校验，必须由程序化代码来保证权限、规则、确定性和审计）</li>
+<li>最后暴露给模型的一般是一个函数接口</li>
+</ul>
+</li>
+</ul>
+<p>并且该类任务容易获取是否成功：通过客户反馈</p>
+<h2 id="coding-agent">Coding Agent</h2>
+<ul>
+<li>代码方案可以设计测试代码检验</li>
+<li>通过测试结果反馈迭代</li>
+<li>问题定义明确</li>
+<li>输出指令可以客观衡量</li>
+</ul>
+<h2 id="tool">Tool</h2>
+<p>对于工具集文档的书写非常重要，甚至比任务提示词更重要</p>
+<p>这里可以称为：Agent-Computer Interface</p>
+<ul>
+<li>降低认知负荷
+<ul>
+<li>让模型在输出格式化结果前，有足够的token进行思考</li>
+<li>避免复杂格式限制
+<ul>
+<li>json里写代码需要对换行、双引号进行痛苦转义</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ACI接口要让人类都能看得懂
+<ul>
+<li>清晰的边界、对待初级程序员</li>
+</ul>
+</li>
+<li>防呆设计（例如CPU的防呆卡槽会让你无法装反CPU）
+<ul>
+<li>从<strong>工具的底层逻辑和参数设计</strong>上，让模型“根本没有犯错的机会”</li>
+<li>例如：模型不擅长相对路径，那就要求模型全部输出绝对路径</li>
+</ul>
+</li>
+</ul>
 ]]></content:encoded></item><item><title>Claude Code学习笔记（一）· 使用技巧</title><link>https://biribiribird.top/posts/claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80-%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/</link><pubDate>Mon, 11 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80-%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/</guid><description>&lt;h2 id="零碎的整理"&gt;零碎的整理&lt;/h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;a href="https://www.bilibili.com/video/BV14rzQB9EJj"&gt;https://www.bilibili.com/video/BV14rzQB9EJj&lt;/a&gt;&lt;/p&gt;
