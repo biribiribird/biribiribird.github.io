@@ -1,4 +1,232 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Agent on BiribiriBird</title><link>https://biribiribird.top/tags/agent/</link><description>Recent content in Agent on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 21 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/tags/agent/index.xml" rel="self" type="application/rss+xml"/><item><title>Anthropic - Building Effective Agents</title><link>https://biribiribird.top/posts/anthropic-building-effective-agents/</link><pubDate>Thu, 21 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/anthropic-building-effective-agents/</guid><description>&lt;h1 id="what"&gt;What&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Agent on BiribiriBird</title><link>https://biribiribird.top/tags/agent/</link><description>Recent content in Agent on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Fri, 22 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/tags/agent/index.xml" rel="self" type="application/rss+xml"/><item><title>转生为Agent高手(二) Anthropic - Effective context engineering for AI agents</title><link>https://biribiribird.top/posts/agentnote-2-effective-context-engineering-for-ai-agents/</link><pubDate>Fri, 22 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-2-effective-context-engineering-for-ai-agents/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;context engineering&lt;/strong&gt;：系统性地设计、构建和优化提供给语言模型的所有上下文信息，目的是引导模型产生更准确、更可控的输出&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;人话：什么样的上下文最有可能让我们的模型产生期望的行为&lt;/p&gt;</description><content:encoded><![CDATA[<blockquote>
+<p><strong>context engineering</strong>：系统性地设计、构建和优化提供给语言模型的所有上下文信息，目的是引导模型产生更准确、更可控的输出</p>
+</blockquote>
+<p>人话：什么样的上下文最有可能让我们的模型产生期望的行为</p>
+<p><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic &mdash; Effective context engineering for AI agents</a></p>
+<h1 id="context-engineering-vs-prompt-engineering">Context Engineering vs. Prompt Engineering</h1>
+<ul>
+<li>提示词工程：为LLM编写和组织指令文本</li>
+<li>上下文工程：在LLM推理过程中，迭代优化Prompt（或是信息）的策略集合</li>
+</ul>
+<p>由于LLM工程的复杂化，静态的提示词编写显然不能满足需求</p>
+<p>Agent在循环过程中必然会不断产生对下一轮有用的信息，这些信息需要被及时优化</p>
+<p>上下文工程贯穿了整个推理过程，<strong>动态维护</strong>了人类指令、历史对话、工具返回结果、外部检索，筛选出最能<strong>提升当前任务成功率</strong>的<strong>最优信息组合</strong></p>
+<p><img alt="Prompt engineering vs. context engineering" loading="lazy" src="/posts/agentnote-2-effective-context-engineering-for-ai-agents/assets/Snipaste_2026-05-22_17-45-29.jpg"></p>
+<h1 id="why-context-engineering-is-important-to-building-capable-agents">Why context engineering is important to building capable agents</h1>
+<ul>
+<li>上下文衰减：大海捞针benchmark已经证明，上下文窗口中token越多，模型从上下文中准确回忆信息的能力确实会下降
+<ul>
+<li>不同模型会有不同表现，但都客观存在衰减</li>
+<li>以及节省上下文能够节省成本</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Transformer的Attention架构决定了注意力是平方级别</p>
+<p>配对关系在长上下文自然会被稀释</p>
+<p>训练数据中短序列也会比长序列更常见。尽管有RoPE（将32K放缩到4K），但是带来了位置模糊感</p>
+<p>上下文衰减是渐变的而非断崖的</p>
+</blockquote>
+<h1 id="the-anatomy-of-effective-context">The anatomy of effective context</h1>
+<p>如何找到最优上下文的构成要素？</p>
+<h2 id="system-prompts">System Prompts</h2>
+<p>系统提示词既不能特别细致，也不能特别抽象，需要找到<strong>刚好能稳定引导智能体行为</strong>的高度</p>
+<p><img alt="prompts" loading="lazy" src="/posts/agentnote-2-effective-context-engineering-for-ai-agents/assets/image-20260522184443360.png"></p>
+<ul>
+<li>Too Specific：在提示词中硬编码复杂脆弱的逻辑</li>
+<li>Too Vague：提供模糊笼统的高层指令</li>
+</ul>
+<p>希望提示词是：既要足够具体以有效<strong>引导行为</strong>，又要足够<strong>灵活</strong>，为模型提供强有力的<strong>启发式指导</strong></p>
+<blockquote>
+<ul>
+<li>如果用户意图是 A，就问 3 个问题；如果是 B，就不要问；如果满足 5/7 个条件，就调用某工具……
+<ul>
+<li>提示词中含有过于复杂的逻辑、业务流程</li>
+<li>真实场景一旦略有偏离，模型就容易误判</li>
+</ul>
+</li>
+<li>你是客服助手，要友好地解决客户问题，必要时升级给人工</li>
+</ul>
+</blockquote>
+<p>核心原则：<strong>不要把 Agent 当成处理流程的程序，也不要把它当成充分理解业务的人。</strong></p>
+<p>好的提示词应该是一份清晰的<strong>岗位说明书</strong>+<strong>操作原则</strong></p>
+<ul>
+<li>身份</li>
+<li>目标</li>
+<li>边界</li>
+<li>可用资源</li>
+<li>决策标准</li>
+<li>输出格式</li>
+<li>少量例子</li>
+</ul>
+<br>
+<p>过于具体：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">如果用户问订单状态，先调用 A 工具。
+</span></span><span class="line"><span class="ln">2</span><span class="cl">如果 A 工具失败，调用 B 工具。
+</span></span><span class="line"><span class="ln">3</span><span class="cl">如果用户说“没收到”，判断是否超过 3 天。
+</span></span><span class="line"><span class="ln">4</span><span class="cl">如果超过 3 天并且地区是美国，执行流程 X。
+</span></span><span class="line"><span class="ln">5</span><span class="cl">如果地区是加拿大，执行流程 Y。
+</span></span><span class="line"><span class="ln">6</span><span class="cl">……
+</span></span></code></pre></div><p>过于模糊：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">你是一个客服助手。请友好、专业地帮助用户解决问题。
+</span></span></code></pre></div><p>Just Right：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">你是电商客服助手，负责帮助用户处理订单状态、配送、退款和商品咨询。
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">目标：
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">尽快理解用户问题，使用可用工具核实事实，并给出清晰、可执行的下一步。
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">工作原则：
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">- 在给出结论前，先确认订单、配送或政策信息。
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">- 如果信息不足，最多提出 1-2 个必要问题。
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">- 多个方案都可行时，优先选择对用户成本最低、成功率最高的方案。
+</span></span><span class="line"><span class="ln">10</span><span class="cl">- 遇到政策例外、支付争议或安全风险时，升级给人工。
+</span></span><span class="line"><span class="ln">11</span><span class="cl">- 回复应简洁、明确，避免暴露内部流程。
+</span></span></code></pre></div><br>
+<br>
+<p>提示词可以组成不同的部分<code>&lt;background_information&gt;</code> 、 <code>&lt;instructions&gt;</code> 、 <code>## Tool guidance</code> 、 <code>## Output description</code></p>
+<ul>
+<li>
+<p>追求用最少的信息完整勾勒出预期的行为模式（但不代表简短）</p>
+</li>
+<li>
+<p>先用一个精简提示测试最优模型，根据失败模式继续优化</p>
+</li>
+</ul>
+<blockquote>
+<p>其实这里的意思就是不要希望穷尽所有可能分支</p>
+<p>留一部分<strong>判断力</strong>给模型即可</p>
+<p>你需要充分考虑实际业务需求，对于确定的内容可以写明应该先……再……</p>
+</blockquote>
+<h2 id="tools">Tools</h2>
+<p>工具必须通过返回 <strong>token 高效的信息</strong>以及<strong>鼓励高效的智能体行为</strong></p>
+<p>确保人类也看得懂，明确在什么情况应该使用什么工具</p>
+<p>建议为工具提供示例，但<strong>不要塞入大量边缘案例（试图穷尽规则）</strong></p>
+<p>应该精心挑选一组多样化、具有代表性的示例，<strong>有效展现智能体的预期行为</strong></p>
+<blockquote>
+<p>示例用于为模型补充说明工具可以达到什么样的效果</p>
+<p>而不是告诉模型什么情况应该用什么</p>
+</blockquote>
+<h1 id="context-retrieval-and-agentic-search">Context retrieval and agentic search</h1>
+<p>如何在运行时动态检索上下文</p>
+<p><a href="https://biribiribird.top/posts/anthropic-building-effective-agents/">转生为Agent高手(一)Anthropic - Building Effective Agents | BiribiriBird</a></p>
+<p>这篇文章以及探讨了workflow和agent，其中将agent定义为：LLM能够在循环中自主使用工具</p>
+<p>随着LLM性能上升，业界趋近于这一范式</p>
+<p>对于检索，之前基本是基于嵌入方法做推理前的检索</p>
+<p>由于逐渐开始关注agent的自主性，越来越多团队通过<strong>即时上下文策略</strong>来增强这些检索</p>
+<ul>
+<li>不再像嵌入方法一样对整个相关数据做预处理，维护轻量级的标识符
+<ul>
+<li>文件路径、URL……agent只需要知道数据在哪</li>
+</ul>
+</li>
+<li>模型通过工具动态加载、引用数据到上下文
+<ul>
+<li>head、tail</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>与人类认知相符：不会记忆整个信息库，而是根据外部组织、索引方式进行检索</p>
+<p>文件夹层级结构、命名约定和时间戳，能够帮助人类和智能体理解如何以及何时利用信息</p>
+<ul>
+<li>test/test_xxx.py和src/xxx.py本身就暗示了用途</li>
+</ul>
+</blockquote>
+<br>
+<p>Agent应该自主进行检索，<strong>渐进式揭示上下文</strong></p>
+<ul>
+<li>Agent探索发现上下文，每次交互产生影响下一步的上下文
+<ul>
+<li>文件大小：暗示复杂度</li>
+<li>命名约定：暗示用途</li>
+<li>时间戳：暗示相关性</li>
+</ul>
+</li>
+<li>Agent逐层理解，保留必要信息，利用笔记策略持久化信息</li>
+</ul>
+<p>减少上下文浪费、动态适应环境，渐进式加载上下文好处确实很多</p>
+<br>
+<p>代价是探索带来的<strong>时延</strong>，需要多轮工具调用：查看目录、搜索、打开文件、筛选、再搜索……</p>
+<p>非常依赖工程设计，需要对工具文档进行良好的设计与规范</p>
+<p>因此设计的核心是：设计一个能让 Agent <strong>有效探索的信息环境</strong></p>
+<br>
+<p>为了平衡效率</p>
+<ul>
+<li>一部分信息可以提前放入上下文，用来提高启动速度。</li>
+<li>一部分信息动态加载披露</li>
+</ul>
+<blockquote>
+<p>CLAUDE.MD会预先放入上下文，提供项目规则、约定、重要说明</p>
+<p><code>glob</code>、<code>grep</code> 等工具让模型可以在运行时搜索文件、定位代码、按需读取内容</p>
+</blockquote>
+<p>这种组合方式更加平衡</p>
+<ul>
+<li>内容变化慢（法律、金融……）：材料相对稳定，适合混合策略</li>
+<li>内容变化快（代码、实验日志）：材料变化多，适合更多的自主探索</li>
+</ul>
+<p>自主探索的设计同样基于最小可行原则：</p>
+<ul>
+<li>根据必要信息、少量高价值工具先做</li>
+<li>根据失败补充规则增加、索引、缓存、自动化流程</li>
+</ul>
+<p>总结：</p>
+<ul>
+<li>好的Agent<strong>按需</strong>探索环境</li>
+<li>纯自主探索成本高、容易跑偏，更好的方案是混合模式：<strong>关键上下文预加载 + 工具驱动的实时探索</strong></li>
+</ul>
+<h2 id="long-horizon-tasks">long-horizon tasks</h2>
+<p>对于长周期的任务，我们需要保证token数量不能超过最大的上下文窗口</p>
+<p>并且上下文需要保持连贯性、上下文感知和目标导向行为</p>
+<blockquote>
+<p>虽然可以等待技术更新，上下文窗口变得更大</p>
+</blockquote>
+<p>但是追求性能的条件下，上下文污染和信息相关性问题的困扰必须要解决</p>
+<p>提供了以下几种方案</p>
+<h3 id="compaction">Compaction</h3>
+<p>压缩是最首要的手段：在接近上限时，对当前内容进行总结</p>
+<p>以总结内容为基础，重新启动新的窗口</p>
+<blockquote>
+<p>Claude Code通过接受消息历史记录，总结提取最关键的信息：</p>
+<ul>
+<li>架构决策</li>
+<li>未解决的bug</li>
+<li>实现细节</li>
+</ul>
+<p>需要丢弃冗余的工具输出、消息</p>
+<p>新窗口只保留压缩后的上下文+最近访问的一些文件</p>
+</blockquote>
+<p><strong>压缩的艺术在于取舍</strong>。过度压缩会丢失一些细节（但可能到后期才能显示关键）</p>
+<p>因此有一个常用的指标：<strong>召回率</strong></p>
+<p>确保压缩提示能捕捉到追踪数据中的每一条相关信息，然后通过消除冗余内容来迭代提升精确度</p>
+<p>比较简单的做法就是：<strong>清空掉工具调用与结果</strong></p>
+<p>如果模型已经看过结果并且利用过了，那其实就不需要再看一遍。</p>
+<h3 id="structured-note-taking"><strong>Structured note-taking</strong></h3>
+<p>结构化笔记（或称为记忆），定期将笔记<strong>持久化存储</strong>到上下文窗口之外的技术</p>
+<p>一些信息被压缩时，不如直接丢到文件里，后续如果要使用再加载回来就好</p>
+<blockquote>
+<p>对于长期的任务计划、进度，最好是保存到文件里，这样非常可控</p>
+<p>记录当前计划走到哪一步了，也能明确知道下一步要做什么，目标是什么</p>
+</blockquote>
+<p>在上下文压缩后，读取永久化记忆确保了上下文的连续性</p>
+<h3 id="sub-agent-architectures">Sub-agent architectures</h3>
+<p>子Agent是一个独立、干净的新Agent，不受到之前上下文的影响</p>
+<p>与其让单个Agent吃掉一堆上下文，不如就新开一个Agent深入工作，想用多少就用多少</p>
+<p>并且只返回最后的结果摘要，完全不会污染上下文</p>
+<blockquote>
+<ul>
+<li>
+<p>详细的搜索上下文被隔离在子代理内部</p>
+</li>
+<li>
+<p>主代理则专注于综合和分析结果</p>
+</li>
+</ul>
+</blockquote>
+]]></content:encoded></item><item><title>转生为Agent高手(一) Anthropic - Building Effective Agents</title><link>https://biribiribird.top/posts/agentnote-1-building-effective-agents/</link><pubDate>Thu, 21 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-1-building-effective-agents/</guid><description>&lt;p&gt;&lt;a href="https://www.anthropic.com/engineering/building-effective-agents"&gt;Building Effective AI Agents &amp;mdash; Anthropic&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="what"&gt;What&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;Workflow&lt;/code&gt;和&lt;code&gt;Agent&lt;/code&gt;的差异还是很大的&lt;/p&gt;
 &lt;p&gt;Antropic将其都归纳为一个&lt;code&gt;Agentic Systems&lt;/code&gt;&lt;/p&gt;
 &lt;ul&gt;
@@ -7,7 +235,8 @@
 &lt;/ul&gt;
 &lt;h1 id="when-and-when-not"&gt;When and When Not&lt;/h1&gt;
 &lt;h2 id="timing"&gt;Timing&lt;/h2&gt;
-&lt;p&gt;Antropic并不建议什么情况下都去做一个复杂的&lt;code&gt;Agentic System&lt;/code&gt;&lt;/p&gt;</description><content:encoded><![CDATA[<h1 id="what">What</h1>
+&lt;p&gt;Antropic并不建议什么情况下都去做一个复杂的&lt;code&gt;Agentic System&lt;/code&gt;&lt;/p&gt;</description><content:encoded><![CDATA[<p><a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective AI Agents &mdash; Anthropic</a></p>
+<h1 id="what">What</h1>
 <p><code>Workflow</code>和<code>Agent</code>的差异还是很大的</p>
 <p>Antropic将其都归纳为一个<code>Agentic Systems</code></p>
 <ul>
@@ -61,7 +290,7 @@
 </ul>
 <p>或者说是一个增强的LLM，<code>The Augmented LLM</code></p>
 <p>不管是workflow还是agent，都需要其作为最小单元进行组成</p>
-<p><img alt="Block:The augmented LLM" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521174411267.png"></p>
+<p><img alt="Block:The augmented LLM" loading="lazy" src="/posts/agentnote-1-building-effective-agents/assets/image-20260521174411267.png"></p>
 <blockquote>
 <p>Block并不等于Agent。取决于外层组织方式</p>
 </blockquote>
@@ -101,7 +330,7 @@
 <p>提供五种workflow设计模式</p>
 <h3 id="workflow1-prompt-chaining">Workflow1: Prompt Chaining</h3>
 <p>最简单的workflow，数据沿着链条通过每一个LLM的prompt</p>
-<p><img alt="Prompt Chain" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521202901846.png"></p>
+<p><img alt="Prompt Chain" loading="lazy" src="/posts/agentnote-1-building-effective-agents/assets/image-20260521202901846.png"></p>
 <p>任务能够被切分为顺序的一系列步骤</p>
 <p>每个LLM处理前一个LLM的输出</p>
 <p>可以在任意步骤之间添加一个Gate，保证任务正常流动</p>
@@ -122,7 +351,7 @@
 <p>在纯Chain的基础上增加了一些分支结构</p>
 <p>显然有时候单份提示词并不能充分完成一个任务</p>
 <p>或许我们可以对任务进行分类，不同类型任务使用不同提示词完成</p>
-<p><img alt="Routing" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521203919488.png"></p>
+<p><img alt="Routing" loading="lazy" src="/posts/agentnote-1-building-effective-agents/assets/image-20260521203919488.png"></p>
 <ul>
 <li>按任务类型进行分类：使用不同提示词</li>
 <li>按任务难度进行分类：使用不同模型节约成本</li>
@@ -134,7 +363,7 @@
 <li>希望获取同一任务的<strong>多样化输出结果（投票）</strong></li>
 </ul>
 <p>那么我们可以并行化</p>
-<p><img alt="Parallelization" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521205400113.png"></p>
+<p><img alt="Parallelization" loading="lazy" src="/posts/agentnote-1-building-effective-agents/assets/image-20260521205400113.png"></p>
 <blockquote>
 <ul>
 <li>独立子任务
@@ -159,7 +388,7 @@
 <p>Orchestrator：管弦乐演奏家；管弦乐编曲家</p>
 <p>可以理解为编排器、指挥、协调器</p>
 </blockquote>
-<p><img alt="Orchestrator-workers" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521205906617.png"></p>
+<p><img alt="Orchestrator-workers" loading="lazy" src="/posts/agentnote-1-building-effective-agents/assets/image-20260521205906617.png"></p>
 <p>与并行化最大的区别：子任务由协调器根据具体输入动态确定</p>
 <blockquote>
 <ul>
@@ -178,7 +407,7 @@
 <h3 id="workflow5-evaluator-optimizer">Workflow5: Evaluator-optimizer</h3>
 <p>似乎就是<strong>Reflection</strong></p>
 <p>一个 LLM 调用生成响应，而另一个则在循环中提供评估和反馈</p>
-<p><img alt="Evaluator-optimizer" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521210236279.png"></p>
+<p><img alt="Evaluator-optimizer" loading="lazy" src="/posts/agentnote-1-building-effective-agents/assets/image-20260521210236279.png"></p>
 <ul>
 <li>拥有明确的评估标准，迭代可以带来价值优化
 <ul>
@@ -205,7 +434,7 @@
 </li>
 <li>任务完后终止，或设置停止条件（例如最大迭代次数）</li>
 </ul>
-<p><img alt="Agent" loading="lazy" src="/posts/anthropic-building-effective-agents/assets/image-20260521212205507.png"></p>
+<p><img alt="Agent" loading="lazy" src="/posts/agentnote-1-building-effective-agents/assets/image-20260521212205507.png"></p>
 <p>何时使用：</p>
 <ul>
 <li>难以预测步骤数量</li>
