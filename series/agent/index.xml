@@ -1,4 +1,270 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Agent on BiribiriBird</title><link>https://biribiribird.top/series/agent/</link><description>Recent content in Agent on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Fri, 22 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/agent/index.xml" rel="self" type="application/rss+xml"/><item><title>转生为Agent高手(二) Anthropic - Effective context engineering for AI agents</title><link>https://biribiribird.top/posts/agentnote-2-effective-context-engineering-for-ai-agents/</link><pubDate>Fri, 22 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-2-effective-context-engineering-for-ai-agents/</guid><description>&lt;blockquote&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Agent on BiribiriBird</title><link>https://biribiribird.top/series/agent/</link><description>Recent content in Agent on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sat, 23 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/agent/index.xml" rel="self" type="application/rss+xml"/><item><title>转生为Agent高手(三) Multi-agent research system. How and Avoid</title><link>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</link><pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</guid><description>&lt;p&gt;&lt;a href="https://www.anthropic.com/engineering/multi-agent-research-system"&gt;Anthropic &amp;mdash; How we built our multi-agent research system&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://cognition.ai/blog/dont-build-multi-agents"&gt;Don’t Build Multi-Agents | Cognition&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;这次我们同时看两篇文章，进行对照&lt;/p&gt;
+&lt;h1 id="intro"&gt;Intro&lt;/h1&gt;
+&lt;p&gt;reseach型任务的特点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;很难提前预测所需的步骤&lt;/li&gt;
+&lt;li&gt;无法有既定的路线，在探索过程中的思路涌现会带来新的&lt;strong&gt;分支&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这类任务需要从海量的信息中搜索出关键内容（本质是压缩）&lt;/p&gt;</description><content:encoded><![CDATA[<p><a href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic &mdash; How we built our multi-agent research system</a></p>
+<p><a href="https://cognition.ai/blog/dont-build-multi-agents">Don’t Build Multi-Agents | Cognition</a></p>
+<p>这次我们同时看两篇文章，进行对照</p>
+<h1 id="intro">Intro</h1>
+<p>reseach型任务的特点：</p>
+<ul>
+<li>很难提前预测所需的步骤</li>
+<li>无法有既定的路线，在探索过程中的思路涌现会带来新的<strong>分支</strong></li>
+</ul>
+<p>这类任务需要从海量的信息中搜索出关键内容（本质是压缩）</p>
+<ul>
+<li>串行的单Agent的上下文与工具调用很难支持完成整个任务</li>
+<li>多Agent系统支持单个Agent用更干净、更充分的上下文窗口去处理分支任务</li>
+</ul>
+<p>因此多Agent系统在此类任务中能够呈现惊人的性能提升</p>
+<p><strong>缺点是：消耗了更加大量的token、进行了更多轮次的工具调用</strong></p>
+<p>但这也是性能提升的核心原因</p>
+<p>总结：</p>
+<ul>
+<li>需要高度并行</li>
+<li>信息量超过单次上下文窗口</li>
+<li>需要对接大量复杂工具</li>
+<li>所有Agent涉及的上下文重叠较小、无复杂依赖关系</li>
+</ul>
+<p>这个时候推荐使用多Agent</p>
+<h1 id="architecture">Architecture</h1>
+<blockquote>
+<p>设计一个Research Agent System</p>
+</blockquote>
+<p>采用<code>orchestrator-worker</code>模式</p>
+<ul>
+<li>主导Agent协调整个流程</li>
+<li>任务运作交由专门子智能体</li>
+</ul>
+<p><img alt="system" loading="lazy" src="/posts/agentnote-3-multi-agent-research-system/assets/image-20260523210456915.png"></p>
+<p>用户需求：调研100家2025年美国的AI Agent公司，给出列表</p>
+<ul>
+<li>Lead Agent分析查询、制定策略，生成subagents探索</li>
+<li>subagents迭代使用搜索工具收集信息，并且完成过滤，返回lead agent</li>
+</ul>
+<p><img loading="lazy" src="/posts/agentnote-3-multi-agent-research-system/assets/image-20260524165128688.png"></p>
+<ul>
+<li>User-&gt;System：创建一个Lead Reseacher，进行迭代Process</li>
+<li><strong>Iterative Research Process</strong></li>
+<li>think进行planing，将plan保存到memory中（创建or修改）</li>
+<li>检索memory，避免plan丢失</li>
+<li>创建subagents，内部进行独立的搜索与评估</li>
+<li>返回压缩后的结果</li>
+<li>Lead评估是否足够，否则继续调研</li>
+</ul>
+<h1 id="prompt">Prompt</h1>
+<p>多agent相对于单Agent的<strong>协调</strong>复杂度急剧增加</p>
+<p>每个Agent都是由Prompt驱动的，因此需要注意Prompt的一些原则</p>
+<ul>
+<li><strong>为每一个Agent构建完全相同的提示词+工具做模拟环境测试，理解工作过程</strong></li>
+<li><strong>Lead需要为每个subagent清晰分配任务，防止重复劳动与遗漏</strong>
+<ul>
+<li>提供明确目标、输出格式、工具、资源使用指南、<u>清晰任务边界</u></li>
+</ul>
+</li>
+<li><strong>根据问题难度自动控制投入的资源（多少个Agent、多少次工具调用）</strong>
+<ul>
+<li>直接在Lead Agent中的Prompt写明资源分配规则</li>
+<li>例如
+<ul>
+<li>简单事实查询（xxx家CEO是谁）：1个Agent3-10次Tool Calls</li>
+<li>直接对比类任务（比较 Claude 和 Gemini 的企业功能差异）：2-4个Agent，每个Agent负责一个维度，每个Agent需要10-15次Tool Call</li>
+<li>复杂研究问题（分析 AI 编程助手市场格局、主要玩家、商业模式、技术趋势和未来机会）：超过10个</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>在Prompt中添加启发式的工具使用原则</strong>
+<ul>
+<li>正确的工具选择非常重要，MCP带来了海量工具，造成了困难</li>
+<li>启发式规则
+<ul>
+<li>首先检查所有可用工具</li>
+<li>根据用户意图匹配工具</li>
+<li>广泛的外部探索搜索网络or优先使用专用工具而非通用工具</li>
+</ul>
+</li>
+<li>优先确保工具描述质量</li>
+</ul>
+</li>
+<li><strong>Agent本身建议参与优化过程</strong>
+<ul>
+<li>Agent改自己的Prompt、测试工具问题、分析失败案例都很擅长</li>
+<li>用Agent来改进Agent的工作环境</li>
+</ul>
+</li>
+<li><strong>先广泛搜索再逐步聚焦</strong>
+<ul>
+<li>通过提示词要求Agent先从简短的、宽泛的查询开始</li>
+<li>评估可用信息，缩小范围</li>
+<li>抵抗Agent偏好冗长、具体的查询</li>
+</ul>
+</li>
+<li><strong>显式引导Agent怎么思考，高效利用thinking token</strong>
+<ul>
+<li>Lead Agent主要思考如何管理任务，subagent主要思考工具怎么交替使用</li>
+<li>结构化思考流程
+<ul>
+<li>先规划，再调用工具</li>
+<li>看完工具结果后再评估、补缺、调整下一步</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>并行工具调用</strong>
+<ul>
+<li>主智能体并行启动 3-5 个子智能体，而非串行执行</li>
+<li>子智能体同时使用 3 个以上工具</li>
+</ul>
+</li>
+</ul>
+<h1 id="评估">评估</h1>
+<p>Agent达成目的路线完全不确定</p>
+<h2 id="早期--小样本">早期 · 小样本</h2>
+<blockquote>
+<p>早期上升空间巨大，一个提示词调整可能30%到80%</p>
+</blockquote>
+<p>早期构建的时候准备20个真实查询进行测试即可</p>
+<p>不要为了构建完整评估体系才开始行动</p>
+<h2 id="llm-as-judge">LLM-AS-JUDGE</h2>
+<ul>
+<li>事实准确性（主张是否与来源一致？）</li>
+<li>引用准确性（引用的来源是否支持主张？）</li>
+<li>完整性（是否涵盖所有要求方面？）</li>
+<li>来源质量（是否优先使用一手资料而非低质量的二手资料？）</li>
+<li>工具效率（是否以合理次数使用正确工具？）</li>
+</ul>
+<blockquote>
+<p>Antropic发现单一提示词输出0.0-1.0分数or正负分类</p>
+<p>与人工判断的一致性最高</p>
+</blockquote>
+<p>当存在明确答案的时候，使用LLM评测非常有效</p>
+<p>只需要判断与答案是否一致即可</p>
+<h2 id="human-eval">Human Eval</h2>
+<p>人工测试能够帮助发现一些偏差，因此必不可少</p>
+<blockquote>
+<p>人类似乎更喜欢SEO优化得到的内容，而不是一些个人博客</p>
+<p>因此可以通过这个偏好去调整提示词</p>
+</blockquote>
+<h1 id="production-reliability">Production reliability</h1>
+<ul>
+<li>
+<p>Agent错误</p>
+<ul>
+<li>需要做持续化执行，存到本地，防止错误重新开始</li>
+<li>中断点恢复，根据持续化的存储结果继续工作</li>
+<li>Agent参与错误处理：告诉错误信息，让模型更换路线</li>
+<li>确定性的保护措施：失败后自动retry、定期做check</li>
+</ul>
+</li>
+<li>
+<p>调试：Agent中间路径不确定</p>
+<ul>
+<li>full production tracing（完整的生产追踪）
+<ul>
+<li>传统指标：延迟、错误率、CPU、内存</li>
+<li>结构化信息：决策记录、工具记录、任务分派记录、失败记录、重试记录</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>部署</p>
+<ul>
+<li>新版本代码部署的时候很难逐步替换旧版本代码（智能体可能正在运行）</li>
+<li>rainbow deployments：新旧版本同时运行，但是新来的流量导入到新版本，直到旧版本Agent没有调用</li>
+</ul>
+</li>
+<li>
+<p>同步</p>
+<ul>
+<li>Lead Agent需要等待所有subagent完成任务</li>
+<li>asynchronous execution
+<ul>
+<li>Lead边接受边调整方向，必要时动态创建</li>
+</ul>
+</li>
+<li>但确实会更难协调、容易冲突</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="avoid">Avoid</h1>
+<p>基于cognition.ai这一篇文章</p>
+<p><img loading="lazy" src="/posts/agentnote-3-multi-agent-research-system/assets/image-20260524182306312.png"></p>
+<p>常见的多Agent范式如图，但是这种架构非常脆弱</p>
+<blockquote>
+<p>任务：抄袭一个《Flappy Bird》</p>
+<ul>
+<li>子任务1：构建一个带有绿色管道和碰撞箱的动态游戏背景</li>
+<li>子任务2：构建一只可以上下移动的小鸟</li>
+</ul>
+<p>结果</p>
+<ul>
+<li>子任务1：建一个看起来像《超级马里奥兄弟》的背景</li>
+<li>子任务2：构建了不像游戏素材的鸟</li>
+</ul>
+<p>最终Lead Agent将错误内容完成合并</p>
+</blockquote>
+<p>这个问题并不能通过简单的将原始任务中的上下文完全塞给subagent解决</p>
+<p>注意，对话是多轮的，subagent需要自己去调用工具</p>
+<p>任何细节差异都可能带来对任务不同的理解</p>
+<h2 id="principle">Principle</h2>
+<ul>
+<li>Principle1：完整的上下文轨迹必须共享</li>
+</ul>
+<p><img loading="lazy" src="/posts/agentnote-3-multi-agent-research-system/assets/image-20260525164648348.png"></p>
+<ul>
+<li>Principle2：行动隐含决策</li>
+</ul>
+<p>Agent的所有行动中自然包含了丰富的信息，若造成丢失则很有可能带来错误积累</p>
+<hr>
+<p>MultiAgent并不能保证上述两个原则</p>
+<p>最简单的方式只有：单线程的线性智能体</p>
+<p>但是上一篇文章也提到了，单智能体会受限于上下文窗口的限制，性能也会触碰瓶颈</p>
+<p>但我们显然可以通过压缩，尽量去保证<strong>上下文连续性</strong></p>
+<p><img loading="lazy" src="/posts/agentnote-3-multi-agent-research-system/assets/image-20260525170123877.png"></p>
+<ul>
+<li>引入一个专门用来压缩上下文的LLM</li>
+</ul>
+<p>因此：<strong>能不使用MultiAgent，就不要使用</strong></p>
+<blockquote>
+<p>需要衡量场景的可靠性是否大于并行性</p>
+</blockquote>
+<h2 id="applying-the-principles">Applying the Principles</h2>
+<p>如果无法完成两个原则的落实，则必须要考虑：</p>
+<ul>
+<li>谨慎地决定哪些工作可以拆出去，哪些不能拆</li>
+</ul>
+<p>例如：</p>
+<ul>
+<li>Claude Code设计的subagent只用来回答问题
+<ul>
+<li>暗示：<strong>调查型任务</strong>可以拆出去，<strong>决策型/执行型任务</strong>要谨慎拆出去</li>
+</ul>
+</li>
+<li>Edit Apply Models：大模型负责“决定怎么改”，小模型负责“实际应用修改”
+<ul>
+<li>这种架构实际上非常高危：只要解释里有轻微歧义，小模型就可能误解并改错</li>
+<li>建议：<strong>同一模型先决定怎么改，然后顺着上下文直接完成修改</strong></li>
+<li>暗示：<strong>不要把一个高度依赖上下文的决策链切成两个互相误解的环节</strong></li>
+<li>除非提供非常详细的指导</li>
+</ul>
+</li>
+<li>Multi-Agents：如果仍然需要并行性，则需要解决Agent之间及时<strong>沟通</strong>的问题
+<ul>
+<li>cross-agent context-passing（跨Agent上下文传递）目前能力一般</li>
+<li>建议：<strong>长期看好，短期不建议作为生产级默认架构</strong></li>
+</ul>
+</li>
+</ul>
+<p>但是这些建议是跟随时代变化的</p>
+]]></content:encoded></item><item><title>转生为Agent高手(二) Anthropic - Effective context engineering for AI agents</title><link>https://biribiribird.top/posts/agentnote-2-effective-context-engineering-for-ai-agents/</link><pubDate>Fri, 22 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-2-effective-context-engineering-for-ai-agents/</guid><description>&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;context engineering&lt;/strong&gt;：系统性地设计、构建和优化提供给语言模型的所有上下文信息，目的是引导模型产生更准确、更可控的输出&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;人话：什么样的上下文最有可能让我们的模型产生期望的行为&lt;/p&gt;</description><content:encoded><![CDATA[<blockquote>
