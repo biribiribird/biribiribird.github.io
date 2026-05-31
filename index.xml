@@ -1,4 +1,267 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>BiribiriBird</title><link>https://biribiribird.top/</link><description>Recent content on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sat, 23 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/index.xml" rel="self" type="application/rss+xml"/><item><title>转生为Agent高手(三) Multi-agent research system. How and Avoid</title><link>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</link><pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</guid><description>&lt;p&gt;&lt;a href="https://www.anthropic.com/engineering/multi-agent-research-system"&gt;Anthropic &amp;mdash; How we built our multi-agent research system&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>BiribiriBird</title><link>https://biribiribird.top/</link><description>Recent content on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sun, 31 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/index.xml" rel="self" type="application/rss+xml"/><item><title>Claude Code学习笔记（二）· AgentLoop</title><link>https://biribiribird.top/posts/claudecode-learning-note-2-loop/</link><pubDate>Sun, 31 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-2-loop/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s01_agent_loop"&gt;learn-claude-code/s01_agent_loop at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Agent归根到底就是一个循环&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;阅读query&lt;/li&gt;
+&lt;li&gt;thinking……&lt;/li&gt;
+&lt;li&gt;do something……/stop&lt;/li&gt;
+&lt;li&gt;observation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Agent通过工具调用进行外部交互&lt;/p&gt;</description><content:encoded><![CDATA[<p><a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s01_agent_loop">learn-claude-code/s01_agent_loop at main · shareAI-lab/learn-claude-code</a></p>
+<p>Agent归根到底就是一个循环</p>
+<ul>
+<li>阅读query</li>
+<li>thinking……</li>
+<li>do something……/stop</li>
+<li>observation</li>
+</ul>
+<p>Agent通过工具调用进行外部交互</p>
+<p>While True的停止条件实际上就是</p>
+<ul>
+<li><code>stop_reason == &quot;tool_use&quot;</code>：执行，返回工具结果，继续循环</li>
+<li><code>stop_reason != &quot;tool_use&quot;</code>：退出循环</li>
+</ul>
+<h1 id="antropic-sdk">Antropic SDK</h1>
+<p>和Openai风格的SDK不太一样，似乎大家喜欢用A社的做工具调用</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="ch">#!/usr/bin/env python3</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="kn">from</span> <span class="nn">anthropic</span> <span class="kn">import</span> <span class="n">Anthropic</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="n">client</span> <span class="o">=</span> <span class="n">Anthropic</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    <span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_BASE_URL&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_API_KEY&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">
+</span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="n">MODEL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;MODEL_ID&#34;</span><span class="p">,</span> <span class="s2">&#34;claude-3-5-sonnet-latest&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">
+</span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="n">TOOLS</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">        <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;bash&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">        <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Run a shell command.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">        <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">            <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">            <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">                <span class="s2">&#34;command&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">            <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;command&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">
+</span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">32</span><span class="cl">    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl">    <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl">            <span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">36</span><span class="cl">            <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="p">(</span>
+</span></span><span class="line"><span class="ln">37</span><span class="cl">                <span class="s2">&#34;请先用一句话说明你将要做什么，&#34;</span>
+</span></span><span class="line"><span class="ln">38</span><span class="cl">                <span class="s2">&#34;然后调用 bash 工具查看当前目录下的文件列表。&#34;</span>
+</span></span><span class="line"><span class="ln">39</span><span class="cl">            <span class="p">),</span>
+</span></span><span class="line"><span class="ln">40</span><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="ln">41</span><span class="cl">    <span class="p">],</span>
+</span></span><span class="line"><span class="ln">42</span><span class="cl">    <span class="n">tools</span><span class="o">=</span><span class="n">TOOLS</span>
+</span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="ln">44</span><span class="cl">
+</span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</span></span></code></pre></div><h2 id="tool">Tool</h2>
+<p>工具定义，其实就是定义一个函数</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">        <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;bash&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">        <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Run a shell command.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">        <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">            <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">            <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">                <span class="s2">&#34;command&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">            <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;command&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>相当于注册了一个函数<code>bash(command:str)</code></p>
+<ul>
+<li>name：工具名，模型调用工具必须名字一致</li>
+<li>description：告诉模型工具的说明</li>
+<li>input_schema：工具输入参数定义</li>
+</ul>
+<blockquote>
+<p>定义了一个command参数（required，必须存在）</p>
+<p>参数值是字符串，且传参方式是是字典对象</p>
+<p>例如：<code>{&quot;command&quot;: &quot;ls -la&quot;}</code></p>
+</blockquote>
+<h2 id="return">Return</h2>
+<p>上述代码的返回是：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="n">Message</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;ec45b38f-7416-4b74-b501-e03448af1633&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="n">container</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="n">content</span><span class="o">=</span><span class="p">[</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">        <span class="n">ThinkingBlock</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">            <span class="n">signature</span><span class="o">=</span><span class="s1">&#39;ec45b38f-7416-4b74-b501-e03448af1633&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">            <span class="n">thinking</span><span class="o">=</span><span class="s2">&#34;....&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">            <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;thinking&#39;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="p">),</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="n">TextBlock</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">            <span class="n">citations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">            <span class="n">text</span><span class="o">=</span><span class="s1">&#39;我将使用 bash 工具查看当前目录下的文件列表。&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">            <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;text&#39;</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">        <span class="p">),</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">        <span class="n">ToolUseBlock</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">            <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;call_00_9mk6ZlmzqJtCPY0Epd165520&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">            <span class="n">caller</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">            <span class="nb">input</span><span class="o">=</span><span class="p">{</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">                <span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="s1">&#39;ls -la&#39;</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bash&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">            <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;tool_use&#39;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">    <span class="p">],</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;deepseek-v4-pro&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">    <span class="n">role</span><span class="o">=</span><span class="s1">&#39;assistant&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">    <span class="n">stop_details</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">    <span class="n">stop_reason</span><span class="o">=</span><span class="s1">&#39;tool_use&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">    <span class="n">stop_sequence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">    <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">    <span class="n">usage</span><span class="o">=</span><span class="n">Usage</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">32</span><span class="cl">        <span class="n">cache_creation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl">        <span class="n">cache_creation_input_tokens</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">        <span class="n">cache_read_input_tokens</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl">        <span class="n">inference_geo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">36</span><span class="cl">        <span class="n">input_tokens</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">37</span><span class="cl">        <span class="n">output_tokens</span><span class="o">=</span><span class="mi">86</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">38</span><span class="cl">        <span class="n">output_tokens_details</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">39</span><span class="cl">        <span class="n">server_tool_use</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">40</span><span class="cl">        <span class="n">service_tier</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span>
+</span></span><span class="line"><span class="ln">41</span><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="p">)</span>
+</span></span></code></pre></div><ul>
+<li><code>content</code>：按Block进行切分，有专门的<code>ToolUseBlock</code>方便解析</li>
+<li><code>stop_reason</code>：这里是<code>tool_use</code>，说明需要调用工具</li>
+</ul>
+<h1 id="code">Code</h1>
+<p>完整代码：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">  1</span><span class="cl"><span class="ch">#!/usr/bin/env python3</span>
+</span></span><span class="line"><span class="ln">  2</span><span class="cl">
+</span></span><span class="line"><span class="ln">  3</span><span class="cl"><span class="kn">import</span> <span class="nn">os</span>
+</span></span><span class="line"><span class="ln">  4</span><span class="cl"><span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+</span></span><span class="line"><span class="ln">  5</span><span class="cl"><span class="kn">from</span> <span class="nn">anthropic</span> <span class="kn">import</span> <span class="n">Anthropic</span>
+</span></span><span class="line"><span class="ln">  6</span><span class="cl"><span class="kn">import</span> <span class="nn">subprocess</span>
+</span></span><span class="line"><span class="ln">  7</span><span class="cl">
+</span></span><span class="line"><span class="ln">  8</span><span class="cl"><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">  9</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 10</span><span class="cl"><span class="n">client</span> <span class="o">=</span> <span class="n">Anthropic</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln"> 11</span><span class="cl">    <span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_BASE_URL&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln"> 12</span><span class="cl">    <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_API_KEY&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln"> 13</span><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 14</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 15</span><span class="cl"><span class="n">MODEL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;MODEL_ID&#34;</span><span class="p">,</span> <span class="s2">&#34;claude-3-5-sonnet-latest&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 16</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 17</span><span class="cl"><span class="n">TOOLS</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="ln"> 18</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 19</span><span class="cl">        <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;bash&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 20</span><span class="cl">        <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Run a shell command.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 21</span><span class="cl">        <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 22</span><span class="cl">            <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 23</span><span class="cl">            <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 24</span><span class="cl">                <span class="s2">&#34;command&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 25</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 26</span><span class="cl">            <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;command&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln"> 27</span><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 28</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 29</span><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="ln"> 30</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 31</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 32</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 33</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 34</span><span class="cl"><span class="n">SYSTEM</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;You are a coding agent at </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="si">}</span><span class="s2">. &#34;</span>
+</span></span><span class="line"><span class="ln"> 35</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 36</span><span class="cl"><span class="c1"># ── Tool execution ────────────────────────────────────────</span>
+</span></span><span class="line"><span class="ln"> 37</span><span class="cl"><span class="k">def</span> <span class="nf">run_bash</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 38</span><span class="cl">    <span class="n">dangerous</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&#34;rm -rf /&#34;</span><span class="p">,</span> <span class="s2">&#34;sudo&#34;</span><span class="p">,</span> <span class="s2">&#34;shutdown&#34;</span><span class="p">,</span> <span class="s2">&#34;reboot&#34;</span><span class="p">,</span> <span class="s2">&#34;&gt; /dev/&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln"> 39</span><span class="cl">    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">d</span> <span class="ow">in</span> <span class="n">command</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dangerous</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln"> 40</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Dangerous command blocked&#34;</span>
+</span></span><span class="line"><span class="ln"> 41</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 42</span><span class="cl">        <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span>
+</span></span><span class="line"><span class="ln"> 43</span><span class="cl">                           <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 44</span><span class="cl">        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">stdout</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 45</span><span class="cl">        <span class="k">return</span> <span class="n">out</span><span class="p">[:</span><span class="mi">50000</span><span class="p">]</span> <span class="k">if</span> <span class="n">out</span> <span class="k">else</span> <span class="s2">&#34;(no output)&#34;</span>
+</span></span><span class="line"><span class="ln"> 46</span><span class="cl">    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 47</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Timeout (120s)&#34;</span>
+</span></span><span class="line"><span class="ln"> 48</span><span class="cl">    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 49</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln"> 50</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 51</span><span class="cl"><span class="k">def</span> <span class="nf">agent_loop</span><span class="p">(</span><span class="n">history</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln"> 52</span><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 53</span><span class="cl">        
+</span></span><span class="line"><span class="ln"> 54</span><span class="cl">        <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln"> 55</span><span class="cl">            <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 56</span><span class="cl">            <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 57</span><span class="cl">            <span class="n">messages</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 58</span><span class="cl">            <span class="n">tools</span><span class="o">=</span><span class="n">TOOLS</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 59</span><span class="cl">            <span class="n">system</span><span class="o">=</span><span class="n">SYSTEM</span><span class="p">,</span>        
+</span></span><span class="line"><span class="ln"> 60</span><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 61</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 62</span><span class="cl">        <span class="c1"># 保存模型记录</span>
+</span></span><span class="line"><span class="ln"> 63</span><span class="cl">        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;assistant&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln"> 64</span><span class="cl">        
+</span></span><span class="line"><span class="ln"> 65</span><span class="cl">        <span class="c1"># 如果不再需要工具调用</span>
+</span></span><span class="line"><span class="ln"> 66</span><span class="cl">        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">!=</span> <span class="s2">&#34;tool_use&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 67</span><span class="cl">            <span class="k">return</span> 
+</span></span><span class="line"><span class="ln"> 68</span><span class="cl">        
+</span></span><span class="line"><span class="ln"> 69</span><span class="cl">        <span class="n">tool_results</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="ln"> 70</span><span class="cl">        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 71</span><span class="cl">            <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;tool_use&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 72</span><span class="cl">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Tool call: </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> with input </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 73</span><span class="cl">                
+</span></span><span class="line"><span class="ln"> 74</span><span class="cl">                <span class="n">run_bash_result</span> <span class="o">=</span> <span class="n">run_bash</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="s1">&#39;command&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="ln"> 75</span><span class="cl">                <span class="n">tool_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+</span></span><span class="line"><span class="ln"> 76</span><span class="cl">                    <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;tool_result&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 77</span><span class="cl">                    <span class="s2">&#34;tool_use_id&#34;</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="c1"># 对应同block的工具调用id</span>
+</span></span><span class="line"><span class="ln"> 78</span><span class="cl">                    <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">run_bash_result</span>
+</span></span><span class="line"><span class="ln"> 79</span><span class="cl">                <span class="p">})</span>                 
+</span></span><span class="line"><span class="ln"> 80</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 81</span><span class="cl">        <span class="c1"># 将工具调用结果添加到历史记录中，供模型后续生成使用</span>
+</span></span><span class="line"><span class="ln"> 82</span><span class="cl">        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">tool_results</span><span class="p">})</span>        
+</span></span><span class="line"><span class="ln"> 83</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 84</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 85</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 86</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 87</span><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 88</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 89</span><span class="cl">    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="ln"> 90</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 91</span><span class="cl">    <span class="c1"># 这里是多轮对话的循环</span>
+</span></span><span class="line"><span class="ln"> 92</span><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 93</span><span class="cl">        <span class="n">query</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&#34;Enter your query: &#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 94</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 95</span><span class="cl">        <span class="k">if</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&#34;exit&#34;</span><span class="p">,</span> <span class="s2">&#34;quit&#34;</span><span class="p">]:</span>
+</span></span><span class="line"><span class="ln"> 96</span><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Exiting the agent loop.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 97</span><span class="cl">            <span class="k">break</span>
+</span></span><span class="line"><span class="ln"> 98</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 99</span><span class="cl">        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">query</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln">100</span><span class="cl">        <span class="n">agent_loop</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="c1"># Agent内部循环，完成工具调用和响应生成</span>
+</span></span><span class="line"><span class="ln">101</span><span class="cl">
+</span></span><span class="line"><span class="ln">102</span><span class="cl">        <span class="n">final_output</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&#34;content&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln">103</span><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="n">final_output</span><span class="p">)</span>
+</span></span></code></pre></div><h1 id="claude-code">Claude Code</h1>
+<p>以上是一个AgentLoop最小实现</p>
+<p>但对于Claude Code的实现也值得去看一下</p>
+<h2 id="循环结构">循环结构</h2>
+<p>CC并不是等待一个响应完成，检测最后的<code>stop_reason</code></p>
+<p>而是根据当前流式输出内容，如果出现<code>ToolUseBlock</code></p>
+<p>设置<code>needsFollowUp = True</code>，表示需要下一轮循环</p>
+<blockquote>
+<p>这里只是说明如何判断Loop中断</p>
+</blockquote>
+<p><code>stop_reason</code>事实上也有其他逻辑使用，暂时不提</p>
+<p>同时为了性能，工具调用也会在流式时进行</p>
+<p>但是会做concurrency-safe的检测，决定并行or独占</p>
+<p>同时针对费用超限、结构化输出失败等做了非常多保护</p>
+<h2 id="退出">退出</h2>
+<p>CC事实上对blocking limit、prompt too long、model error、abort、hook stop、max turns、token budget continuation、reactive compact retry 等场景，都准备了退出、恢复机制</p>
+<p>以上代码只有模型不调用工具就结束的逻辑</p>
+]]></content:encoded></item><item><title>转生为Agent高手(三) Multi-agent research system. How and Avoid</title><link>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</link><pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</guid><description>&lt;p&gt;&lt;a href="https://www.anthropic.com/engineering/multi-agent-research-system"&gt;Anthropic &amp;mdash; How we built our multi-agent research system&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://cognition.ai/blog/dont-build-multi-agents"&gt;Don’t Build Multi-Agents | Cognition&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;这次我们同时看两篇文章，进行对照&lt;/p&gt;
 &lt;h1 id="intro"&gt;Intro&lt;/h1&gt;
