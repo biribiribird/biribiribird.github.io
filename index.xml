@@ -1,4 +1,632 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>BiribiriBird</title><link>https://biribiribird.top/</link><description>Recent content on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sun, 31 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/index.xml" rel="self" type="application/rss+xml"/><item><title>Claude Code学习笔记（二）· AgentLoop</title><link>https://biribiribird.top/posts/claudecode-learning-note-2-loop/</link><pubDate>Sun, 31 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-2-loop/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s01_agent_loop"&gt;learn-claude-code/s01_agent_loop at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>BiribiriBird</title><link>https://biribiribird.top/</link><description>Recent content on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 02 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/index.xml" rel="self" type="application/rss+xml"/><item><title>Claude Code学习笔记（四）· Permission</title><link>https://biribiribird.top/posts/claudecode-learning-note-4-permission/</link><pubDate>Tue, 02 Jun 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-4-permission/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s03_permission"&gt;learn-claude-code/s03_permission at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;其实之前的代码中已经有一些安全机制了&lt;/p&gt;
+&lt;p&gt;比如&lt;code&gt;safe_path&lt;/code&gt;，限制只能在指定的目录下工作&lt;/p&gt;
+&lt;p&gt;防止模型路径逃逸&lt;/p&gt;
+&lt;p&gt;但如果模型搞一个&lt;code&gt;rm -rf&lt;/code&gt;出来，仍然是非常危险的&lt;/p&gt;</description><content:encoded><![CDATA[<p><a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s03_permission">learn-claude-code/s03_permission at main · shareAI-lab/learn-claude-code</a></p>
+<p>其实之前的代码中已经有一些安全机制了</p>
+<p>比如<code>safe_path</code>，限制只能在指定的目录下工作</p>
+<p>防止模型路径逃逸</p>
+<p>但如果模型搞一个<code>rm -rf</code>出来，仍然是非常危险的</p>
+<p><strong>安全绝对不能依靠概率模型，要靠代码在工具使用之前判断</strong></p>
+<p><img loading="lazy" src="/posts/claudecode-learning-note-4-permission/assets/image-20260602171148283.png"></p>
+<h1 id="permission">Permission</h1>
+<h2 id="block-1">Block 1</h2>
+<p>设定了一个<strong>硬拒绝列表</strong>，在列表内的操作直接拒绝</p>
+<p>例如：<code>sudo</code>、<code>rm -rf /</code>、……</p>
+<h2 id="block-2">Block 2</h2>
+<p>规则匹配</p>
+<ul>
+<li>需要询问用户的情况</li>
+<li>直接放行的情况</li>
+</ul>
+<h2 id="block-3">Block 3</h2>
+<p>用户审核</p>
+<h1 id="code">code</h1>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">  1</span><span class="cl"><span class="ch">#!/usr/bin/env python3</span>
+</span></span><span class="line"><span class="ln">  2</span><span class="cl"><span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="ln">  3</span><span class="cl"><span class="s2">s02: Tool Use — 在 s01 基础上新增 4 个工具 + 分发映射。
+</span></span></span><span class="line"><span class="ln">  4</span><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="ln">  5</span><span class="cl"><span class="s2">运行: python s02_tool_use/code.py
+</span></span></span><span class="line"><span class="ln">  6</span><span class="cl"><span class="s2">需要: pip install anthropic python-dotenv + .env 中配置 ANTHROPIC_API_KEY
+</span></span></span><span class="line"><span class="ln">  7</span><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="ln">  8</span><span class="cl"><span class="s2">本文件 = s01 的全部代码 + 以下新增:
+</span></span></span><span class="line"><span class="ln">  9</span><span class="cl"><span class="s2">  + run_read / run_write / run_edit / run_glob 四个工具实现
+</span></span></span><span class="line"><span class="ln"> 10</span><span class="cl"><span class="s2">  + TOOL_HANDLERS 分发映射（替代 s01 中硬编码的 run_bash 调用）
+</span></span></span><span class="line"><span class="ln"> 11</span><span class="cl"><span class="s2">  + safe_path 路径安全校验
+</span></span></span><span class="line"><span class="ln"> 12</span><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="ln"> 13</span><span class="cl"><span class="s2">循环本身（agent_loop）与 s01 完全一致。
+</span></span></span><span class="line"><span class="ln"> 14</span><span class="cl"><span class="s2">&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="ln"> 15</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 16</span><span class="cl"><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span>
+</span></span><span class="line"><span class="ln"> 17</span><span class="cl"><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+</span></span><span class="line"><span class="ln"> 18</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 19</span><span class="cl"><span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 20</span><span class="cl">    <span class="kn">import</span> <span class="nn">readline</span>
+</span></span><span class="line"><span class="ln"> 21</span><span class="cl">    <span class="n">readline</span><span class="o">.</span><span class="n">parse_and_bind</span><span class="p">(</span><span class="s1">&#39;set bind-tty-special-chars off&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 22</span><span class="cl">    <span class="n">readline</span><span class="o">.</span><span class="n">parse_and_bind</span><span class="p">(</span><span class="s1">&#39;set input-meta on&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 23</span><span class="cl">    <span class="n">readline</span><span class="o">.</span><span class="n">parse_and_bind</span><span class="p">(</span><span class="s1">&#39;set output-meta on&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 24</span><span class="cl">    <span class="n">readline</span><span class="o">.</span><span class="n">parse_and_bind</span><span class="p">(</span><span class="s1">&#39;set convert-meta off&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 25</span><span class="cl"><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 26</span><span class="cl">    <span class="k">pass</span>
+</span></span><span class="line"><span class="ln"> 27</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 28</span><span class="cl"><span class="kn">from</span> <span class="nn">anthropic</span> <span class="kn">import</span> <span class="n">Anthropic</span>
+</span></span><span class="line"><span class="ln"> 29</span><span class="cl"><span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+</span></span><span class="line"><span class="ln"> 30</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 31</span><span class="cl"><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 32</span><span class="cl"><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_BASE_URL&#34;</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln"> 33</span><span class="cl">    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_AUTH_TOKEN&#34;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 34</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 35</span><span class="cl"><span class="n">WORKDIR</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 36</span><span class="cl"><span class="n">client</span> <span class="o">=</span> <span class="n">Anthropic</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_BASE_URL&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln"> 37</span><span class="cl"><span class="n">MODEL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&#34;MODEL_ID&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln"> 38</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 39</span><span class="cl"><span class="n">SYSTEM</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;You are a coding agent at </span><span class="si">{</span><span class="n">WORKDIR</span><span class="si">}</span><span class="s2">. Use tools to solve tasks. Act, don&#39;t explain.&#34;</span>
+</span></span><span class="line"><span class="ln"> 40</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 41</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 42</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln"> 43</span><span class="cl"><span class="c1">#  FROM s01 (unchanged)</span>
+</span></span><span class="line"><span class="ln"> 44</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln"> 45</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 46</span><span class="cl"><span class="k">def</span> <span class="nf">run_bash</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 47</span><span class="cl">    <span class="n">dangerous</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&#34;rm -rf /&#34;</span><span class="p">,</span> <span class="s2">&#34;sudo&#34;</span><span class="p">,</span> <span class="s2">&#34;shutdown&#34;</span><span class="p">,</span> <span class="s2">&#34;reboot&#34;</span><span class="p">,</span> <span class="s2">&#34;&gt; /dev/&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln"> 48</span><span class="cl">    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">d</span> <span class="ow">in</span> <span class="n">command</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dangerous</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln"> 49</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Dangerous command blocked&#34;</span>
+</span></span><span class="line"><span class="ln"> 50</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 51</span><span class="cl">        <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">WORKDIR</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 52</span><span class="cl">                           <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 53</span><span class="cl">                           <span class="n">encoding</span><span class="o">=</span><span class="s2">&#34;utf-8&#34;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&#34;replace&#34;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 54</span><span class="cl">        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">stdout</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 55</span><span class="cl">        <span class="k">return</span> <span class="n">out</span><span class="p">[:</span><span class="mi">50000</span><span class="p">]</span> <span class="k">if</span> <span class="n">out</span> <span class="k">else</span> <span class="s2">&#34;(no output)&#34;</span>
+</span></span><span class="line"><span class="ln"> 56</span><span class="cl">    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 57</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Timeout (120s)&#34;</span>
+</span></span><span class="line"><span class="ln"> 58</span><span class="cl">    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 59</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln"> 60</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 61</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 62</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln"> 63</span><span class="cl"><span class="c1">#  NEW in s02: 4 个新工具</span>
+</span></span><span class="line"><span class="ln"> 64</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln"> 65</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 66</span><span class="cl"><span class="k">def</span> <span class="nf">safe_path</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 67</span><span class="cl">    <span class="n">path</span> <span class="o">=</span> <span class="p">(</span><span class="n">WORKDIR</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 68</span><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">WORKDIR</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln"> 69</span><span class="cl">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Path escapes workspace: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 70</span><span class="cl">    <span class="k">return</span> <span class="n">path</span>
+</span></span><span class="line"><span class="ln"> 71</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 72</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 73</span><span class="cl"><span class="k">def</span> <span class="nf">run_read</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 74</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 75</span><span class="cl">        <span class="n">lines</span> <span class="o">=</span> <span class="n">safe_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 76</span><span class="cl">        <span class="k">if</span> <span class="n">limit</span> <span class="ow">and</span> <span class="n">limit</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln"> 77</span><span class="cl">            <span class="n">lines</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&#34;... (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">-</span> <span class="n">limit</span><span class="si">}</span><span class="s2"> more lines)&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln"> 78</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 79</span><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 80</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln"> 81</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 82</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 83</span><span class="cl"><span class="k">def</span> <span class="nf">run_write</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 84</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 85</span><span class="cl">        <span class="n">file_path</span> <span class="o">=</span> <span class="n">safe_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 86</span><span class="cl">        <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 87</span><span class="cl">        <span class="n">file_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 88</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Wrote </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="p">)</span><span class="si">}</span><span class="s2"> bytes to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln"> 89</span><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 90</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln"> 91</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 92</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 93</span><span class="cl"><span class="k">def</span> <span class="nf">run_edit</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">old_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 94</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 95</span><span class="cl">        <span class="n">file_path</span> <span class="o">=</span> <span class="n">safe_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 96</span><span class="cl">        <span class="n">text</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 97</span><span class="cl">        <span class="k">if</span> <span class="n">old_text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 98</span><span class="cl">            <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: text not found in </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln"> 99</span><span class="cl">        <span class="n">file_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old_text</span><span class="p">,</span> <span class="n">new_text</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">100</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Edited </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">101</span><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">102</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">103</span><span class="cl">
+</span></span><span class="line"><span class="ln">104</span><span class="cl">
+</span></span><span class="line"><span class="ln">105</span><span class="cl"><span class="k">def</span> <span class="nf">run_glob</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">106</span><span class="cl">    <span class="kn">import</span> <span class="nn">glob</span> <span class="k">as</span> <span class="nn">g</span>
+</span></span><span class="line"><span class="ln">107</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">108</span><span class="cl">        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="ln">109</span><span class="cl">        <span class="k">for</span> <span class="k">match</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">root_dir</span><span class="o">=</span><span class="n">WORKDIR</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">110</span><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">WORKDIR</span> <span class="o">/</span> <span class="k">match</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">WORKDIR</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">111</span><span class="cl">                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">match</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">112</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="k">if</span> <span class="n">results</span> <span class="k">else</span> <span class="s2">&#34;(no matches)&#34;</span>
+</span></span><span class="line"><span class="ln">113</span><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">114</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">115</span><span class="cl">
+</span></span><span class="line"><span class="ln">116</span><span class="cl">
+</span></span><span class="line"><span class="ln">117</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln">118</span><span class="cl"><span class="c1">#  NEW in s02: 工具定义（s01 只有一个 bash，现在扩展到 5 个）</span>
+</span></span><span class="line"><span class="ln">119</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln">120</span><span class="cl">
+</span></span><span class="line"><span class="ln">121</span><span class="cl"><span class="n">TOOLS</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="ln">122</span><span class="cl">    <span class="p">{</span><span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;bash&#34;</span><span class="p">,</span> <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Run a shell command.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">123</span><span class="cl">     <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span> <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;command&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}},</span> <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;command&#34;</span><span class="p">]}},</span>
+</span></span><span class="line"><span class="ln">124</span><span class="cl">    <span class="p">{</span><span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;read_file&#34;</span><span class="p">,</span> <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Read file contents.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">125</span><span class="cl">     <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span> <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;path&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">},</span> <span class="s2">&#34;limit&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;integer&#34;</span><span class="p">}},</span> <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;path&#34;</span><span class="p">]}},</span>
+</span></span><span class="line"><span class="ln">126</span><span class="cl">    <span class="p">{</span><span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;write_file&#34;</span><span class="p">,</span> <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Write content to a file.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">127</span><span class="cl">     <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span> <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;path&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">},</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}},</span> <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;path&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">]}},</span>
+</span></span><span class="line"><span class="ln">128</span><span class="cl">    <span class="p">{</span><span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;edit_file&#34;</span><span class="p">,</span> <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Replace exact text in a file once.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">129</span><span class="cl">     <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span> <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;path&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">},</span> <span class="s2">&#34;old_text&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">},</span> <span class="s2">&#34;new_text&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}},</span> <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;path&#34;</span><span class="p">,</span> <span class="s2">&#34;old_text&#34;</span><span class="p">,</span> <span class="s2">&#34;new_text&#34;</span><span class="p">]}},</span>
+</span></span><span class="line"><span class="ln">130</span><span class="cl">    <span class="p">{</span><span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;glob&#34;</span><span class="p">,</span> <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Find files matching a glob pattern.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">131</span><span class="cl">     <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span> <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;pattern&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}},</span> <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;pattern&#34;</span><span class="p">]}},</span>
+</span></span><span class="line"><span class="ln">132</span><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="ln">133</span><span class="cl">
+</span></span><span class="line"><span class="ln">134</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln">135</span><span class="cl"><span class="c1">#  NEW in s02: 工具分发映射（s01 是硬编码 run_bash，现在改为查表）</span>
+</span></span><span class="line"><span class="ln">136</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln">137</span><span class="cl">
+</span></span><span class="line"><span class="ln">138</span><span class="cl"><span class="n">TOOL_HANDLERS</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">139</span><span class="cl">    <span class="s2">&#34;bash&#34;</span><span class="p">:</span> <span class="n">run_bash</span><span class="p">,</span> <span class="s2">&#34;read_file&#34;</span><span class="p">:</span> <span class="n">run_read</span><span class="p">,</span> <span class="s2">&#34;write_file&#34;</span><span class="p">:</span> <span class="n">run_write</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">140</span><span class="cl">    <span class="s2">&#34;edit_file&#34;</span><span class="p">:</span> <span class="n">run_edit</span><span class="p">,</span> <span class="s2">&#34;glob&#34;</span><span class="p">:</span> <span class="n">run_glob</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">141</span><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="ln">142</span><span class="cl">
+</span></span><span class="line"><span class="ln">143</span><span class="cl"><span class="c1"># my code in s03</span>
+</span></span><span class="line"><span class="ln">144</span><span class="cl"><span class="c1"># -----------------------------------------------------------</span>
+</span></span><span class="line"><span class="ln">145</span><span class="cl">
+</span></span><span class="line"><span class="ln">146</span><span class="cl"><span class="c1"># Gate 1: Hard deny list — always forbidden</span>
+</span></span><span class="line"><span class="ln">147</span><span class="cl"><span class="n">DENY_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&#34;rm -rf /&#34;</span><span class="p">,</span> <span class="s2">&#34;sudo&#34;</span><span class="p">,</span> <span class="s2">&#34;shutdown&#34;</span><span class="p">,</span> <span class="s2">&#34;reboot&#34;</span><span class="p">,</span> <span class="s2">&#34;mkfs&#34;</span><span class="p">,</span> <span class="s2">&#34;dd if=&#34;</span><span class="p">,</span> <span class="s2">&#34;&gt; /dev/sda&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln">148</span><span class="cl"><span class="k">def</span> <span class="nf">check_deny_list</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">149</span><span class="cl">    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">d</span> <span class="ow">in</span> <span class="n">command</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">DENY_LIST</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">150</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Dangerous command blocked&#34;</span>
+</span></span><span class="line"><span class="ln">151</span><span class="cl">    <span class="k">return</span> <span class="kc">None</span>
+</span></span><span class="line"><span class="ln">152</span><span class="cl">
+</span></span><span class="line"><span class="ln">153</span><span class="cl"><span class="c1"># Gate 2: Rule matching — context-dependent checks</span>
+</span></span><span class="line"><span class="ln">154</span><span class="cl"><span class="n">PERMISSION_RULES</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="ln">155</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln">156</span><span class="cl">        <span class="s2">&#34;tools&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;write_file&#34;</span><span class="p">,</span> <span class="s2">&#34;edit_file&#34;</span><span class="p">],</span> <span class="c1"># 针对的工具</span>
+</span></span><span class="line"><span class="ln">157</span><span class="cl">        <span class="s2">&#34;check&#34;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="ow">not</span> <span class="p">(</span><span class="n">WORKDIR</span> <span class="o">/</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;path&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">))</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">WORKDIR</span><span class="p">),</span> <span class="c1"># lambda方法</span>
+</span></span><span class="line"><span class="ln">158</span><span class="cl">        <span class="s2">&#34;message&#34;</span><span class="p">:</span> <span class="s2">&#34;Writing outside workspace&#34;</span> <span class="c1"># 提供给用户的核验消息</span>
+</span></span><span class="line"><span class="ln">159</span><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="ln">160</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln">161</span><span class="cl">        <span class="s2">&#34;tools&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;bash&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln">162</span><span class="cl">        <span class="s2">&#34;check&#34;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="nb">any</span><span class="p">(</span><span class="n">kw</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;command&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">)</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&#34;rm &#34;</span><span class="p">,</span> <span class="s2">&#34;&gt; /etc/&#34;</span><span class="p">,</span> <span class="s2">&#34;chmod 777&#34;</span><span class="p">]),</span>
+</span></span><span class="line"><span class="ln">163</span><span class="cl">        <span class="s2">&#34;message&#34;</span><span class="p">:</span> <span class="s2">&#34;Potentially destructive command&#34;</span>
+</span></span><span class="line"><span class="ln">164</span><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="ln">165</span><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="ln">166</span><span class="cl">
+</span></span><span class="line"><span class="ln">167</span><span class="cl"><span class="k">def</span> <span class="nf">check_rules</span><span class="p">(</span><span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">168</span><span class="cl">    <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">PERMISSION_RULES</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">169</span><span class="cl">        <span class="c1"># 如果在检测名单中 并且触发了危险信号 提交人工审核</span>
+</span></span><span class="line"><span class="ln">170</span><span class="cl">        <span class="k">if</span> <span class="n">tool_name</span> <span class="ow">in</span> <span class="n">rule</span><span class="p">[</span><span class="s2">&#34;tools&#34;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">rule</span><span class="p">[</span><span class="s2">&#34;check&#34;</span><span class="p">](</span><span class="n">args</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">171</span><span class="cl">            <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Warning: </span><span class="si">{</span><span class="n">rule</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">172</span><span class="cl">    <span class="k">return</span> <span class="kc">None</span>
+</span></span><span class="line"><span class="ln">173</span><span class="cl">
+</span></span><span class="line"><span class="ln">174</span><span class="cl"><span class="c1"># Gate 3: User approval — wait for confirmation after rule match</span>
+</span></span><span class="line"><span class="ln">175</span><span class="cl"><span class="k">def</span> <span class="nf">ask_user</span><span class="p">(</span><span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">176</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\n\033</span><span class="s2">[33m⚠  </span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">177</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;   Tool: </span><span class="si">{</span><span class="n">tool_name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">)&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">178</span><span class="cl">    <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&#34;   Allow? [y/N] &#34;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">179</span><span class="cl">    <span class="k">return</span> <span class="s2">&#34;allow&#34;</span> <span class="k">if</span> <span class="n">choice</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&#34;y&#34;</span><span class="p">,</span> <span class="s2">&#34;yes&#34;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&#34;deny&#34;</span>
+</span></span><span class="line"><span class="ln">180</span><span class="cl">
+</span></span><span class="line"><span class="ln">181</span><span class="cl"><span class="c1"># pipeline</span>
+</span></span><span class="line"><span class="ln">182</span><span class="cl"><span class="k">def</span> <span class="nf">check_permission_pipeline</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">183</span><span class="cl">    <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;bash&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">184</span><span class="cl">        <span class="n">reason</span> <span class="o">=</span> <span class="n">check_deny_list</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&#34;command&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">185</span><span class="cl">        <span class="k">if</span> <span class="n">reason</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">186</span><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\n\033</span><span class="s2">[31m⛔ </span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">187</span><span class="cl">            <span class="k">return</span> <span class="kc">False</span>
+</span></span><span class="line"><span class="ln">188</span><span class="cl">    <span class="n">reason</span> <span class="o">=</span> <span class="n">check_rules</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">189</span><span class="cl">    <span class="k">if</span> <span class="n">reason</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">190</span><span class="cl">        <span class="n">decision</span> <span class="o">=</span> <span class="n">ask_user</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">191</span><span class="cl">        <span class="k">if</span> <span class="n">decision</span> <span class="o">==</span> <span class="s2">&#34;deny&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">192</span><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\n\033</span><span class="s2">[31m⛔ User denied permission for </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">193</span><span class="cl">            <span class="k">return</span> <span class="kc">False</span>
+</span></span><span class="line"><span class="ln">194</span><span class="cl">    <span class="k">return</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="ln">195</span><span class="cl">
+</span></span><span class="line"><span class="ln">196</span><span class="cl">
+</span></span><span class="line"><span class="ln">197</span><span class="cl"><span class="c1"># -----------------------------------------------------------</span>
+</span></span><span class="line"><span class="ln">198</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln">199</span><span class="cl"><span class="c1">#  agent_loop — 与 s01 结构完全一致，只改了工具执行那部分</span>
+</span></span><span class="line"><span class="ln">200</span><span class="cl"><span class="c1">#  s01: output = run_bash(block.input[&#34;command&#34;])</span>
+</span></span><span class="line"><span class="ln">201</span><span class="cl"><span class="c1">#  s02: output = TOOL_HANDLERS[block.name](**block.input)</span>
+</span></span><span class="line"><span class="ln">202</span><span class="cl"><span class="c1"># ═══════════════════════════════════════════════════════════</span>
+</span></span><span class="line"><span class="ln">203</span><span class="cl">
+</span></span><span class="line"><span class="ln">204</span><span class="cl"><span class="k">def</span> <span class="nf">agent_loop</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">205</span><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">206</span><span class="cl">        <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">207</span><span class="cl">            <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">SYSTEM</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">208</span><span class="cl">            <span class="n">tools</span><span class="o">=</span><span class="n">TOOLS</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">209</span><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="ln">210</span><span class="cl">        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;assistant&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln">211</span><span class="cl">
+</span></span><span class="line"><span class="ln">212</span><span class="cl">        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">!=</span> <span class="s2">&#34;tool_use&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">213</span><span class="cl">            <span class="k">return</span>
+</span></span><span class="line"><span class="ln">214</span><span class="cl">
+</span></span><span class="line"><span class="ln">215</span><span class="cl">        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="ln">216</span><span class="cl">        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">217</span><span class="cl">            <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&#34;tool_use&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">218</span><span class="cl">                
+</span></span><span class="line"><span class="ln">219</span><span class="cl">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\033</span><span class="s2">[33m&gt; </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="si">}</span><span class="s2">)</span><span class="se">\033</span><span class="s2">[0m&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">220</span><span class="cl">                <span class="c1"># 权限核验</span>
+</span></span><span class="line"><span class="ln">221</span><span class="cl">                <span class="k">if</span> <span class="ow">not</span> <span class="n">check_permission_pipeline</span><span class="p">(</span><span class="n">block</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">222</span><span class="cl">                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;tool_result&#34;</span><span class="p">,</span> <span class="s2">&#34;tool_use_id&#34;</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="s2">&#34;Permission denied&#34;</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln">223</span><span class="cl">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\033</span><span class="s2">[31m⛔ Permission denied for </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">224</span><span class="cl">                    <span class="k">continue</span>
+</span></span><span class="line"><span class="ln">225</span><span class="cl">
+</span></span><span class="line"><span class="ln">226</span><span class="cl">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\033</span><span class="s2">[33m&gt; </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">227</span><span class="cl">                <span class="n">handler</span> <span class="o">=</span> <span class="n">TOOL_HANDLERS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">228</span><span class="cl">                <span class="n">output</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="o">**</span><span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="p">)</span> <span class="k">if</span> <span class="n">handler</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&#34;Unknown: </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">229</span><span class="cl">                <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="p">)[:</span><span class="mi">200</span><span class="p">])</span>
+</span></span><span class="line"><span class="ln">230</span><span class="cl">                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;tool_result&#34;</span><span class="p">,</span> <span class="s2">&#34;tool_use_id&#34;</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">output</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln">231</span><span class="cl">
+</span></span><span class="line"><span class="ln">232</span><span class="cl">        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">results</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln">233</span><span class="cl">
+</span></span><span class="line"><span class="ln">234</span><span class="cl">
+</span></span><span class="line"><span class="ln">235</span><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">236</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;s02: Tool Use — 在 s01 基础上加了 4 个工具&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">237</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;输入问题，回车发送。输入 q 退出。</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">238</span><span class="cl">
+</span></span><span class="line"><span class="ln">239</span><span class="cl">    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="ln">240</span><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">241</span><span class="cl">        <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">242</span><span class="cl">            <span class="n">query</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\033</span><span class="s2">[36ms02 &gt;&gt; </span><span class="se">\033</span><span class="s2">[0m&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">243</span><span class="cl">        <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">KeyboardInterrupt</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">244</span><span class="cl">            <span class="k">break</span>
+</span></span><span class="line"><span class="ln">245</span><span class="cl">        <span class="k">if</span> <span class="n">query</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&#34;q&#34;</span><span class="p">,</span> <span class="s2">&#34;exit&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">246</span><span class="cl">            <span class="k">break</span>
+</span></span><span class="line"><span class="ln">247</span><span class="cl">        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">query</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln">248</span><span class="cl">        <span class="n">agent_loop</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">249</span><span class="cl">        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&#34;content&#34;</span><span class="p">]:</span>
+</span></span><span class="line"><span class="ln">250</span><span class="cl">            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">&#34;type&#34;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&#34;text&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">251</span><span class="cl">                <span class="nb">print</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">252</span><span class="cl">        <span class="nb">print</span><span class="p">()</span>
+</span></span></code></pre></div><p>总体来说还是比较粗糙</p>
+<p>有一个明显的bug，如果一直permission，llm可能会反复重试（当然是多种方案）</p>
+<h1 id="claude-code">Claude Code</h1>
+<h2 id="permission-1">Permission</h2>
+<p>CC分为四个档</p>
+<ul>
+<li><code>allow</code>：直接允许</li>
+<li><code>ask</code>：询问</li>
+<li><code>deny</code>：直接拒绝</li>
+<li><code>passthrough</code>：CC独有，暂时搁置，对当前状态暂不进行拒绝，留到之后的工具、pipeline进行判定</li>
+</ul>
+<h2 id="source">Source</h2>
+<p>CC允许在不同层级（8个来源）中设置权限规则</p>
+<p>例如</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="ln">1</span><span class="cl"><span class="p">{</span> <span class="err">toolName:</span> <span class="nt">&#34;Bash&#34;</span><span class="p">,</span> <span class="err">ruleBehavior:</span> <span class="nt">&#34;deny&#34;</span><span class="p">,</span> <span class="err">ruleContent:</span> <span class="nt">&#34;npm publish:*&#34;</span> <span class="p">}</span>
+</span></span></code></pre></div><p>当规则发生冲突时，按照优先级进行处理</p>
+<p>当前会话优先，最后是全局用户选项</p>
+<div class="mermaid">
+flowchart TB
+  CLI[&#34;CLI Args / Command / Session&lt;br/&gt;会话 / 命令行参数&#34;]
+  Policy[&#34;Policy&lt;br/&gt;企业策略&#34;]
+  Flags[&#34;Flags&lt;br/&gt;特性开关&#34;]
+  Local[&#34;Local&lt;br/&gt;本地覆盖&#34;]
+  Project[&#34;Project&lt;br/&gt;项目&#34;]
+  User[&#34;User&lt;br/&gt;用户全局&#34;]
+
+  CLI --&gt;|覆盖| Policy --&gt;|覆盖| Flags --&gt;|覆盖| Local --&gt;|覆盖| Project --&gt;|覆盖| User
+</div>
+<blockquote>
+<p>本地allow的行为可能会被企业Policy直接deny</p>
+</blockquote>
+<h2 id="pipeline">Pipeline</h2>
+<p>Agent发起工具请求时，必须经过一个<code>checkPermissionsAndCallTool()</code>主导的流水线</p>
+<ul>
+<li>静态验证
+<ol>
+<li><strong>Zod Schema 验证</strong>：首先检查 Agent 传过来的参数类型对不对（比如数字是不是写成了字符串）</li>
+<li><strong><code>validateInput()</code></strong>：工具级别的语义验证。工具自己会检查参数是否合规</li>
+<li><strong><code>backfillObservableInput()</code></strong>：向下兼容，补全遗留或缺失的属性字段</li>
+</ol>
+</li>
+<li>动态策略（Hooks + 核心管线 ）<br>
+4. <strong>PreToolUse Hooks</strong>：挂载第三方插件或自定义逻辑，钩子可以直接返回 <code>allow</code> / <code>deny</code> / <code>ask</code><br>
+5. <strong><code>resolveHookPermissionDecision()</code></strong>：协调钩子+管线决策<br>
+6. 核心规则检查
+<ul>
+<li><strong>绝对禁用</strong>：命中高优先级Source的 <code>deny</code></li>
+<li><strong>ASK</strong>：命中高优先级Source的 <code>ask</code></li>
+<li><strong>自定义检查</strong>：调用工具自身的 <code>tool.checkPermissions()</code></li>
+<li><strong>安全越界</strong>：触发系统级安全检查违规（转化为ask）</li>
+<li><strong>全局放行</strong>：命中 <code>allow</code> 规则</li>
+<li><strong>兜底处理</strong>：若全未命中（<code>passthrough</code>） ➔ 最终保守退化为 <code>ask</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="isdestructive">isDestructive</h2>
+<p>在源码中会看到一个 <code>isDestructive</code> 属性，教学版往往容易误把它当成防御闸门。但实际上：</p>
+<ul>
+<li>它<strong>纯粹是 UI 展示标签</strong>。</li>
+<li>它的唯一作用是在终端列表里标红显示 <code>[destructive]</code> 以警示用户。</li>
+<li>它<strong>不参与任何权限逻辑的决策</strong>，真正的安全机制完全由上述的 Pipeline 保证。</li>
+</ul>
+<h2 id="yoloclassifier">YoloClassifier</h2>
+<p>Auto模式下启用LLM进行判断放行</p>
+<ul>
+<li>把工具调用 + 对话上下文发给一个分类器 LLM 判断是否安全
+<ul>
+<li>先尝试 acceptEdits 模式模拟，如果 acceptEdits 允许 → 直接批准</li>
+<li>查安全工具白名单</li>
+<li>最后：分类器，分类器连续拒绝太多次 → 回退到人工审批</li>
+</ul>
+</li>
+</ul>
+<h2 id="bubble">Bubble</h2>
+<p>子 Agent（通过 AgentTool fork 出来的）的 <code>permissionMode</code> 设为 <code>'bubble'</code></p>
+<p>权限弹窗<strong>冒泡到父 Agent 的终端</strong></p>
+]]></content:encoded></item><item><title>Claude Code学习笔记（三）· Tool Use</title><link>https://biribiribird.top/posts/claudecode-learning-note-3-tooluse/</link><pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-3-tooluse/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s02_tool_use"&gt;learn-claude-code/s02_tool_use at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;前文需要完成一个文件读写，通过&lt;code&gt;bash&lt;/code&gt;工具&lt;/p&gt;
+&lt;p&gt;需要让模型自己思考：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;是否使用&lt;code&gt;cat&lt;/code&gt;指令&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cat&lt;/code&gt;哪一个文件&lt;/li&gt;
+&lt;li&gt;……&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此对于常用的功能，我们最好通过系统层面的封装&lt;/p&gt;</description><content:encoded><![CDATA[<p><a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s02_tool_use">learn-claude-code/s02_tool_use at main · shareAI-lab/learn-claude-code</a></p>
+<p>前文需要完成一个文件读写，通过<code>bash</code>工具</p>
+<p>需要让模型自己思考：</p>
+<ul>
+<li>是否使用<code>cat</code>指令</li>
+<li><code>cat</code>哪一个文件</li>
+<li>……</li>
+</ul>
+<p>因此对于常用的功能，我们最好通过系统层面的封装</p>
+<p>避免token的消耗，同时也能够<strong>减少出错概率</strong></p>
+<p>我们可以引入一个<code>TOOL_HANDLERS</code>，作为字典映射到每一个工具的具体代码</p>
+<p><img loading="lazy" src="/posts/claudecode-learning-note-3-tooluse/assets/image-20260601183354276.png"></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">  1</span><span class="cl"><span class="ch">#!/usr/bin/env python3</span>
+</span></span><span class="line"><span class="ln">  2</span><span class="cl">
+</span></span><span class="line"><span class="ln">  3</span><span class="cl"><span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+</span></span><span class="line"><span class="ln">  4</span><span class="cl"><span class="kn">from</span> <span class="nn">anthropic</span> <span class="kn">import</span> <span class="n">Anthropic</span>
+</span></span><span class="line"><span class="ln">  5</span><span class="cl"><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span>
+</span></span><span class="line"><span class="ln">  6</span><span class="cl"><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+</span></span><span class="line"><span class="ln">  7</span><span class="cl">
+</span></span><span class="line"><span class="ln">  8</span><span class="cl"><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">  9</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 10</span><span class="cl"><span class="n">client</span> <span class="o">=</span> <span class="n">Anthropic</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln"> 11</span><span class="cl">    <span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_BASE_URL&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln"> 12</span><span class="cl">    <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;ANTHROPIC_API_KEY&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln"> 13</span><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 14</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 15</span><span class="cl"><span class="n">MODEL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&#34;MODEL_ID&#34;</span><span class="p">,</span> <span class="s2">&#34;claude-3-5-sonnet-latest&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 16</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 17</span><span class="cl"><span class="n">TOOLS</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="ln"> 18</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 19</span><span class="cl">        <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;bash&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 20</span><span class="cl">        <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Run a shell command.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 21</span><span class="cl">        <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 22</span><span class="cl">            <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 23</span><span class="cl">            <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 24</span><span class="cl">                <span class="s2">&#34;command&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 25</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 26</span><span class="cl">            <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;command&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln"> 27</span><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 28</span><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 29</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 30</span><span class="cl">        <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;read_file&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 31</span><span class="cl">        <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Read the content of a file.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 32</span><span class="cl">        <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 33</span><span class="cl">            <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 34</span><span class="cl">            <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 35</span><span class="cl">                <span class="s2">&#34;path&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 36</span><span class="cl">                <span class="s2">&#34;limit&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;integer&#34;</span><span class="p">}</span> <span class="c1"># 可选参数，限制读取的字节数，默认读取整个文件</span>
+</span></span><span class="line"><span class="ln"> 37</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 38</span><span class="cl">            <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;path&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln"> 39</span><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 40</span><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 41</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 42</span><span class="cl">        <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;write_file&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 43</span><span class="cl">        <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Write content to a file.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 44</span><span class="cl">        <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 45</span><span class="cl">            <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 46</span><span class="cl">            <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 47</span><span class="cl">                <span class="s2">&#34;path&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 48</span><span class="cl">                <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 49</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 50</span><span class="cl">            <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;path&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln"> 51</span><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 52</span><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 53</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 54</span><span class="cl">        <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;edit_file&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 55</span><span class="cl">        <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Replace exact text in a file once.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 56</span><span class="cl">        <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 57</span><span class="cl">            <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 58</span><span class="cl">            <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 59</span><span class="cl">                <span class="s2">&#34;path&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 60</span><span class="cl">                <span class="s2">&#34;old_text&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 61</span><span class="cl">                <span class="s2">&#34;new_text&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 62</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 63</span><span class="cl">            <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;path&#34;</span><span class="p">,</span> <span class="s2">&#34;old_text&#34;</span><span class="p">,</span> <span class="s2">&#34;new_text&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln"> 64</span><span class="cl">        <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 65</span><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 66</span><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 67</span><span class="cl">        <span class="s2">&#34;name&#34;</span><span class="p">:</span> <span class="s2">&#34;glob&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 68</span><span class="cl">        <span class="s2">&#34;description&#34;</span><span class="p">:</span> <span class="s2">&#34;Find files matching a glob pattern.&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 69</span><span class="cl">        <span class="s2">&#34;input_schema&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 70</span><span class="cl">            <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;object&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 71</span><span class="cl">            <span class="s2">&#34;properties&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 72</span><span class="cl">                <span class="s2">&#34;pattern&#34;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;string&#34;</span><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 73</span><span class="cl">            <span class="p">},</span>
+</span></span><span class="line"><span class="ln"> 74</span><span class="cl">            <span class="s2">&#34;required&#34;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&#34;pattern&#34;</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln"> 75</span><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 76</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 77</span><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="ln"> 78</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 79</span><span class="cl"><span class="n">WORKDIR</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 80</span><span class="cl"><span class="c1"># ── Tool execution ────────────────────────────────────────</span>
+</span></span><span class="line"><span class="ln"> 81</span><span class="cl"><span class="k">def</span> <span class="nf">run_bash</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 82</span><span class="cl">    <span class="n">dangerous</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&#34;rm -rf /&#34;</span><span class="p">,</span> <span class="s2">&#34;sudo&#34;</span><span class="p">,</span> <span class="s2">&#34;shutdown&#34;</span><span class="p">,</span> <span class="s2">&#34;reboot&#34;</span><span class="p">,</span> <span class="s2">&#34;&gt; /dev/&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln"> 83</span><span class="cl">    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">d</span> <span class="ow">in</span> <span class="n">command</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dangerous</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln"> 84</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Dangerous command blocked&#34;</span>
+</span></span><span class="line"><span class="ln"> 85</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 86</span><span class="cl">        <span class="n">r</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">WORKDIR</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 87</span><span class="cl">                           <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 88</span><span class="cl">                           <span class="n">encoding</span><span class="o">=</span><span class="s2">&#34;utf-8&#34;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&#34;replace&#34;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 89</span><span class="cl">        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">stdout</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 90</span><span class="cl">        <span class="k">return</span> <span class="n">out</span><span class="p">[:</span><span class="mi">50000</span><span class="p">]</span> <span class="k">if</span> <span class="n">out</span> <span class="k">else</span> <span class="s2">&#34;(no output)&#34;</span>
+</span></span><span class="line"><span class="ln"> 91</span><span class="cl">    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 92</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;Error: Timeout (120s)&#34;</span>
+</span></span><span class="line"><span class="ln"> 93</span><span class="cl">    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 94</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln"> 95</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 96</span><span class="cl"><span class="c1"># 路径安全限制：确保路径必须在WORKDIR之内，不能逃逸</span>
+</span></span><span class="line"><span class="ln"> 97</span><span class="cl"><span class="k">def</span> <span class="nf">safe_path</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 98</span><span class="cl">    <span class="n">path</span> <span class="o">=</span> <span class="p">(</span><span class="n">WORKDIR</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="c1"># 绝对路径</span>
+</span></span><span class="line"><span class="ln"> 99</span><span class="cl">    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">WORKDIR</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">100</span><span class="cl">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Path escapes workspace: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">101</span><span class="cl">    <span class="k">return</span> <span class="n">path</span>
+</span></span><span class="line"><span class="ln">102</span><span class="cl">
+</span></span><span class="line"><span class="ln">103</span><span class="cl">
+</span></span><span class="line"><span class="ln">104</span><span class="cl"><span class="k">def</span> <span class="nf">run_read</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">105</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">106</span><span class="cl">        <span class="n">lines</span> <span class="o">=</span> <span class="n">safe_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">107</span><span class="cl">        <span class="k">if</span> <span class="n">limit</span> <span class="ow">and</span> <span class="n">limit</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">108</span><span class="cl">            <span class="n">lines</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&#34;... (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">-</span> <span class="n">limit</span><span class="si">}</span><span class="s2"> more lines)&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln">109</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">110</span><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">111</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">112</span><span class="cl">    
+</span></span><span class="line"><span class="ln">113</span><span class="cl"><span class="k">def</span> <span class="nf">run_write</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">114</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">115</span><span class="cl">        <span class="n">path</span> <span class="o">=</span> <span class="n">safe_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">116</span><span class="cl">        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">117</span><span class="cl">        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">118</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Wrote </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="p">)</span><span class="si">}</span><span class="s2"> bytes to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">119</span><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">120</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">121</span><span class="cl">    
+</span></span><span class="line"><span class="ln">122</span><span class="cl"><span class="k">def</span> <span class="nf">run_edit</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">old_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">123</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">124</span><span class="cl">        <span class="n">path</span> <span class="o">=</span> <span class="n">safe_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">125</span><span class="cl">        <span class="n">text</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">126</span><span class="cl">        <span class="k">if</span> <span class="n">old_text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">127</span><span class="cl">            <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: text not found in </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">128</span><span class="cl">        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old_text</span><span class="p">,</span> <span class="n">new_text</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">129</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Edited </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">130</span><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">131</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">132</span><span class="cl">
+</span></span><span class="line"><span class="ln">133</span><span class="cl">
+</span></span><span class="line"><span class="ln">134</span><span class="cl"><span class="k">def</span> <span class="nf">run_glob</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">135</span><span class="cl">    <span class="kn">import</span> <span class="nn">glob</span> <span class="k">as</span> <span class="nn">g</span>
+</span></span><span class="line"><span class="ln">136</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">137</span><span class="cl">        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="ln">138</span><span class="cl">        <span class="k">for</span> <span class="k">match</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">root_dir</span><span class="o">=</span><span class="n">WORKDIR</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">139</span><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">WORKDIR</span> <span class="o">/</span> <span class="k">match</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">WORKDIR</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">140</span><span class="cl">                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">match</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">141</span><span class="cl">        <span class="k">return</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="k">if</span> <span class="n">results</span> <span class="k">else</span> <span class="s2">&#34;(no matches)&#34;</span>
+</span></span><span class="line"><span class="ln">142</span><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">143</span><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">144</span><span class="cl">    
+</span></span><span class="line"><span class="ln">145</span><span class="cl">
+</span></span><span class="line"><span class="ln">146</span><span class="cl">
+</span></span><span class="line"><span class="ln">147</span><span class="cl"><span class="n">TOOL_HANDLERS</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">148</span><span class="cl">    <span class="s2">&#34;bash&#34;</span><span class="p">:</span> <span class="n">run_bash</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">149</span><span class="cl">    <span class="s2">&#34;read_file&#34;</span><span class="p">:</span> <span class="n">run_read</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">150</span><span class="cl">    <span class="s2">&#34;write_file&#34;</span><span class="p">:</span> <span class="n">run_write</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">151</span><span class="cl">    <span class="s2">&#34;edit_file&#34;</span><span class="p">:</span> <span class="n">run_edit</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">152</span><span class="cl">    <span class="s2">&#34;glob&#34;</span><span class="p">:</span> <span class="n">run_glob</span>
+</span></span><span class="line"><span class="ln">153</span><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="ln">154</span><span class="cl">
+</span></span><span class="line"><span class="ln">155</span><span class="cl">
+</span></span><span class="line"><span class="ln">156</span><span class="cl"><span class="n">SYSTEM</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;You are a coding agent at </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="si">}</span><span class="s2">. Use bash to solve tasks. Act, don&#39;t explain.&#34;</span>
+</span></span><span class="line"><span class="ln">157</span><span class="cl">
+</span></span><span class="line"><span class="ln">158</span><span class="cl">
+</span></span><span class="line"><span class="ln">159</span><span class="cl">
+</span></span><span class="line"><span class="ln">160</span><span class="cl"><span class="k">def</span> <span class="nf">agent_loop</span><span class="p">(</span><span class="n">history</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">161</span><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">162</span><span class="cl">        
+</span></span><span class="line"><span class="ln">163</span><span class="cl">        <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">164</span><span class="cl">            <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">165</span><span class="cl">            <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">166</span><span class="cl">            <span class="n">messages</span><span class="o">=</span><span class="n">history</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">167</span><span class="cl">            <span class="n">tools</span><span class="o">=</span><span class="n">TOOLS</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">168</span><span class="cl">            <span class="n">system</span><span class="o">=</span><span class="n">SYSTEM</span><span class="p">,</span>        
+</span></span><span class="line"><span class="ln">169</span><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="ln">170</span><span class="cl">
+</span></span><span class="line"><span class="ln">171</span><span class="cl">        <span class="c1"># 保存模型记录</span>
+</span></span><span class="line"><span class="ln">172</span><span class="cl">        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;assistant&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln">173</span><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Model response: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">174</span><span class="cl">        <span class="c1"># 如果不再需要工具调用</span>
+</span></span><span class="line"><span class="ln">175</span><span class="cl">        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">!=</span> <span class="s2">&#34;tool_use&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">176</span><span class="cl">            <span class="k">return</span> 
+</span></span><span class="line"><span class="ln">177</span><span class="cl">        
+</span></span><span class="line"><span class="ln">178</span><span class="cl">        <span class="n">tool_results</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="ln">179</span><span class="cl">        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">180</span><span class="cl">            <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;tool_use&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">181</span><span class="cl">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Tool call: </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> with input </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">182</span><span class="cl">                <span class="n">handler</span> <span class="o">=</span> <span class="n">TOOL_HANDLERS</span><span class="p">[</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="c1"># 转化对应函数</span>
+</span></span><span class="line"><span class="ln">183</span><span class="cl">                <span class="n">output</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="o">**</span><span class="n">block</span><span class="o">.</span><span class="n">input</span><span class="p">)</span> <span class="k">if</span> <span class="n">handler</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&#34;Unknow: </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="ln">184</span><span class="cl">                <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="p">)[:</span><span class="mi">200</span><span class="p">])</span>
+</span></span><span class="line"><span class="ln">185</span><span class="cl">                <span class="n">tool_results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+</span></span><span class="line"><span class="ln">186</span><span class="cl">                    <span class="s2">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;tool_result&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">187</span><span class="cl">                    <span class="s2">&#34;tool_use_id&#34;</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="c1"># 对应同block的工具调用id</span>
+</span></span><span class="line"><span class="ln">188</span><span class="cl">                    <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">output</span>
+</span></span><span class="line"><span class="ln">189</span><span class="cl">                <span class="p">})</span>                 
+</span></span><span class="line"><span class="ln">190</span><span class="cl">
+</span></span><span class="line"><span class="ln">191</span><span class="cl">        <span class="c1"># 将工具调用结果添加到历史记录中，供模型后续生成使用</span>
+</span></span><span class="line"><span class="ln">192</span><span class="cl">        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">tool_results</span><span class="p">})</span>        
+</span></span><span class="line"><span class="ln">193</span><span class="cl">
+</span></span><span class="line"><span class="ln">194</span><span class="cl">
+</span></span><span class="line"><span class="ln">195</span><span class="cl">
+</span></span><span class="line"><span class="ln">196</span><span class="cl">
+</span></span><span class="line"><span class="ln">197</span><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">198</span><span class="cl">
+</span></span><span class="line"><span class="ln">199</span><span class="cl">    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="ln">200</span><span class="cl">    
+</span></span><span class="line"><span class="ln">201</span><span class="cl">    <span class="c1"># 这里是多轮对话的循环</span>
+</span></span><span class="line"><span class="ln">202</span><span class="cl">    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">203</span><span class="cl">        <span class="n">query</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&#34;Enter your query: &#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">204</span><span class="cl">
+</span></span><span class="line"><span class="ln">205</span><span class="cl">        <span class="k">if</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&#34;exit&#34;</span><span class="p">,</span> <span class="s2">&#34;quit&#34;</span><span class="p">]:</span>
+</span></span><span class="line"><span class="ln">206</span><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Exiting the agent loop.&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">207</span><span class="cl">            <span class="k">break</span>
+</span></span><span class="line"><span class="ln">208</span><span class="cl">
+</span></span><span class="line"><span class="ln">209</span><span class="cl">        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&#34;role&#34;</span><span class="p">:</span> <span class="s2">&#34;user&#34;</span><span class="p">,</span> <span class="s2">&#34;content&#34;</span><span class="p">:</span> <span class="n">query</span><span class="p">})</span>
+</span></span><span class="line"><span class="ln">210</span><span class="cl">        <span class="n">agent_loop</span><span class="p">(</span><span class="n">history</span><span class="p">)</span> <span class="c1"># Agent内部循环，完成工具调用和响应生成</span>
+</span></span><span class="line"><span class="ln">211</span><span class="cl">
+</span></span><span class="line"><span class="ln">212</span><span class="cl">        <span class="n">final_output</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&#34;content&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="ln">213</span><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="n">final_output</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">214</span><span class="cl">
+</span></span><span class="line"><span class="ln">215</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Goodbye!&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><p>当任务比较复杂的时候，模型会一次性输出多个toolblock</p>
+<p>如果模型足够强，这当然是并发的，因此可以获取所有toolblock去做</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">Read both README.md and requirements.txt, then create a summary file
+</span></span></code></pre></div><p>这里会先两个tool块获取两个文件信息</p>
+<p>然后思考一下，第二次循环做写的工具调用</p>
+<h1 id="claude-code">Claude Code</h1>
+<h2 id="定义">定义</h2>
+<p>工具的定义上我们是定义与实现分开的</p>
+<p>但实际上CC会对每个工具通过<code>buildTool()</code>实例化一个对象</p>
+<p>包含 schema、验证、权限、执行</p>
+<h2 id="validation">Validation</h2>
+<p>工具调用前需要经过严格的五步验证</p>
+<ul>
+<li>Zod Schema（类似json schema）：参数类型、结构检查</li>
+<li>工具级别的参数验证：确保参数符合工具输入要求</li>
+<li>PreToolUse hooks：工具执行前设计一些hooks进行工作</li>
+<li>权限：是否涉及了不允许的内容</li>
+<li>执行</li>
+</ul>
+<h2 id="isconcurrencysafe">isConcurrencySafe()</h2>
+<p>代码中还是串行的，CC实际上是按照batch做并行</p>
+<p><img loading="lazy" src="/posts/claudecode-learning-note-3-tooluse/assets/image-20260601234621602.png"></p>
+<p>有专门的方法<code>isConcurrencySafe()</code>检验一个工具调用是否是并发安全的</p>
+<blockquote>
+<p>并发安全和只读是不一样的。有的方法是非只读的，但是由于操作不同文件，因此两者之间是并发安全的</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln">1</span><span class="cl">[read A, read B, glob *.py, bash &#34;rm x&#34;, read C]
+</span></span><span class="line"><span class="ln">2</span><span class="cl">  → batch1(并发): [read A, read B, glob *.py]
+</span></span><span class="line"><span class="ln">3</span><span class="cl">  → batch2(串行): [bash &#34;rm x&#34;]
+</span></span><span class="line"><span class="ln">4</span><span class="cl">  → batch3(并发): [read C]
+</span></span></code></pre></div><p>并发安全的连续块编入同一个 batch</p>
+<p>batch 内真正并发执行（有并发上限）</p>
+<p>遇到非并发安全就开新batch</p>
+<p>batch之间串行</p>
+<h2 id="result持久化">Result持久化</h2>
+<p>当一个工具的输出足够长时，为了节省token</p>
+<p>设计了一个<code>maxResultSizeChars</code></p>
+<p>如果超过上限，自动截断，将完整内容保存到文件中</p>
+<p>只提供给模型<strong>上限内的文本 + 完整内容的文件路径</strong></p>
+<p>对于Read操作，为了防止重复创建文件</p>
+<p>这个上限直接设置成无限即可</p>
+]]></content:encoded></item><item><title>Claude Code学习笔记（二）· AgentLoop</title><link>https://biribiribird.top/posts/claudecode-learning-note-2-loop/</link><pubDate>Sun, 31 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-2-loop/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s01_agent_loop"&gt;learn-claude-code/s01_agent_loop at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Agent归根到底就是一个循环&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;阅读query&lt;/li&gt;
