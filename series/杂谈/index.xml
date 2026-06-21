@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>杂谈 on BiribiriBird</title><link>https://biribiribird.top/series/%E6%9D%82%E8%B0%88/</link><description>Recent content in 杂谈 on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sun, 21 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/%E6%9D%82%E8%B0%88/index.xml" rel="self" type="application/rss+xml"/><item><title>杂谈 · Python异步</title><link>https://biribiribird.top/posts/tittle-tattle-async/</link><pubDate>Sun, 21 Jun 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/tittle-tattle-async/</guid><description>&lt;h1 id="code"&gt;Code&lt;/h1&gt;
+&lt;h2 id="事件循环-event-loop"&gt;事件循环 event loop&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;asyncio&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;一个“调度员”，专门负责运行异步任务，并在任务等待的时候切换去做别的任务。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在事件循环中，反复做以下事情：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;看看有没有协程要继续执行&lt;/li&gt;
+&lt;li&gt;执行一小段&lt;/li&gt;
+&lt;li&gt;如果遇到 await，就把这个协程暂停&lt;/li&gt;
+&lt;li&gt;去执行别的已经准备好的协程&lt;/li&gt;
+&lt;li&gt;等某个 I/O、定时器、网络请求完成后，再恢复对应协程&lt;/li&gt;
+&lt;li&gt;一直循环，直到任务都完成&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;大概就是看哪些事情可以做了，就去做，否则就等着&lt;/p&gt;</description><content:encoded><![CDATA[<h1 id="code">Code</h1>
+<h2 id="事件循环-event-loop">事件循环 event loop</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</span></span></code></pre></div><blockquote>
+<p>一个“调度员”，专门负责运行异步任务，并在任务等待的时候切换去做别的任务。</p>
+</blockquote>
+<p>在事件循环中，反复做以下事情：</p>
+<ul>
+<li>看看有没有协程要继续执行</li>
+<li>执行一小段</li>
+<li>如果遇到 await，就把这个协程暂停</li>
+<li>去执行别的已经准备好的协程</li>
+<li>等某个 I/O、定时器、网络请求完成后，再恢复对应协程</li>
+<li>一直循环，直到任务都完成</li>
+</ul>
+<blockquote>
+<p>大概就是看哪些事情可以做了，就去做，否则就等着</p>
+</blockquote>
+<h2 id="协程函数">协程函数</h2>
+<p><strong>协程 coroutine</strong> 可以理解成一种“可以暂停、以后再继续执行的函数”。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;A&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;B&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><p>这样定义的协程函数是<strong>可暂停的</strong></p>
+<p>也就是可以让程序有能力在等待 I/O 的时候切换去做别的事</p>
+<p>其中：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span></code></pre></div><p>暂停当前的协程，将主导权交还给事件循环</p>
+<p>让事件循环去做别的能做的事情</p>
+<p>之后在恢复继续执行</p>
+<h2 id="并行">并行</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kn">import</span> <span class="nn">asyncio</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;  → 开始请求 </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># 模拟网络 I/O——控制权交还给事件循环</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;  ← </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> 完成&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;[</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> 的响应]&#34;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">
+</span></span><span class="line"><span class="ln">10</span><span class="cl">
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;=&#34;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;async 串行（注意：还是串行！）&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">
+</span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="n">t0</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="c1"># 三次 await 是顺序执行的——每个都要等前一个完成</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="n">r1</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="n">r2</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;b.com&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">    <span class="n">r3</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;c.com&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">
+</span></span><span class="line"><span class="ln">22</span><span class="cl">    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">结果: </span><span class="si">{</span><span class="n">r1</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">r2</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">r3</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;⏱ 耗时: </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s  ← 还是 3 秒，因为 await 在等它完成！&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">
+</span></span><span class="line"><span class="ln">26</span><span class="cl">
+</span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="c1"># ── 启动入口 </span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</span></span></code></pre></div><p>输出：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln"> 1</span><span class="cl">async 串行（注意：还是串行！）
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  → 开始请求 a.com
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">  ← a.com 完成
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">  → 开始请求 b.com
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">  ← b.com 完成
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">  → 开始请求 c.com
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  ← c.com 完成
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">结果: [a.com 的响应], [b.com 的响应], [c.com 的响应]
+</span></span><span class="line"><span class="ln">10</span><span class="cl">⏱ 耗时: 3.0s  ← 还是 3 秒，因为 await 在等它完成！
+</span></span></code></pre></div><p>这里虽然是<code>await</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl">    <span class="n">r1</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="n">r2</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;b.com&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="n">r3</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;c.com&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><p>但实际执行逻辑是</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln"> 1</span><span class="cl">main()
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  └─ await fetch(&#34;a.com&#34;)
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">        └─ 等 a.com 完成
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">main()
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">  └─ await fetch(&#34;b.com&#34;)
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">        └─ 等 b.com 完成
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">main()
+</span></span><span class="line"><span class="ln">10</span><span class="cl">  └─ await fetch(&#34;c.com&#34;)
+</span></span><span class="line"><span class="ln">11</span><span class="cl">        └─ 等 c.com 完成
+</span></span></code></pre></div><p><strong>事件循环中，没有同时在<code>await</code>的其他任务</strong></p>
+<blockquote>
+<p>a在await的时候，卡在这里，还没执行到b、c的await</p>
+</blockquote>
+<p>自然无法等待到已完成、能够先执行的任务</p>
+<hr>
+<p>因此，为了达成并行的效果，显然我们需要同时<code>await</code>几个协程</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kn">import</span> <span class="nn">asyncio</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="s2">&#34;&#34;&#34;模拟异步网络请求，每个耗时 1 秒&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;  → 开始请求 </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;  ← </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> 完成&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;[</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> 的响应]&#34;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">
+</span></span><span class="line"><span class="ln">11</span><span class="cl">
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;=&#34;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;asyncio.gather 并发请求：&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="n">t0</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">
+</span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="c1"># gather：同时启动，一起等 ── 关键！</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">        <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">        <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;b.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">        <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;c.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">
+</span></span><span class="line"><span class="ln">25</span><span class="cl">    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">结果: </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;⏱ 耗时: </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s  ← 三个同时跑，只用了 1 秒！&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">
+</span></span><span class="line"><span class="ln">29</span><span class="cl">
+</span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="c1"># ── 启动 </span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</span></span></code></pre></div><p>来仔细走一遍流程：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</span></span></code></pre></div><ul>
+<li>创建一个事件循环</li>
+<li>把 main 协程放进事件循环，开始运行<code>main</code></li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;b.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;c.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="p">)</span>
+</span></span></code></pre></div><ul>
+<li>
+<p>创建三个协程</p>
+<ul>
+<li><code>fetch(&quot;a.com&quot;)</code> -&gt; coroutine A</li>
+<li><code>fetch(&quot;b.com&quot;)</code> -&gt; coroutine B</li>
+<li><code>fetch(&quot;c.com&quot;)</code> -&gt; coroutine C</li>
+</ul>
+</li>
+<li>
+<p>由<code>gather</code>打包成一个任务<code>Task</code>，交给事件循环调度</p>
+</li>
+<li>
+<p>对于<code>await asyncio.gather</code></p>
+<ul>
+<li>需要等待<code>gather</code>中的任务完成，才会继续往下执行</li>
+<li>事件循环发现<code>fetch(&quot;a.com&quot;)</code>可以启动
+<ul>
+<li><code>await 1s</code>，交还事件循环</li>
+</ul>
+</li>
+<li>事件循环发现<code>fetch(&quot;b.com&quot;)</code>可以启动
+<ul>
+<li><code>await 1s</code>，交还事件循环</li>
+</ul>
+</li>
+<li>事件循环发现<code>fetch(&quot;c.com&quot;)</code>可以启动
+<ul>
+<li><code>await 1s</code>，交还事件循环</li>
+</ul>
+</li>
+<li>然后等待三个协程阻塞结束，收集结果到<code>gather</code></li>
+<li><code>gather</code>的阻塞也结束</li>
+</ul>
+</li>
+<li>
+<p>回到<code>main</code></p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln"> 1</span><span class="cl">全局代码
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">└── asyncio.run(main())
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    └── 事件循环启动
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">        └── main()
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">            ├── print(...)
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">            ├── 记录 t0
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">            └── await asyncio.gather(...)
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">                ├── 创建/调度 fetch(&#34;a.com&#34;)
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">                │   ├── print(&#34;开始请求 a.com&#34;)
+</span></span><span class="line"><span class="ln">10</span><span class="cl">                │   └── await asyncio.sleep(1)  暂停
+</span></span><span class="line"><span class="ln">11</span><span class="cl">                │
+</span></span><span class="line"><span class="ln">12</span><span class="cl">                ├── 创建/调度 fetch(&#34;b.com&#34;)
+</span></span><span class="line"><span class="ln">13</span><span class="cl">                │   ├── print(&#34;开始请求 b.com&#34;)
+</span></span><span class="line"><span class="ln">14</span><span class="cl">                │   └── await asyncio.sleep(1)  暂停
+</span></span><span class="line"><span class="ln">15</span><span class="cl">                │
+</span></span><span class="line"><span class="ln">16</span><span class="cl">                └── 创建/调度 fetch(&#34;c.com&#34;)
+</span></span><span class="line"><span class="ln">17</span><span class="cl">                    ├── print(&#34;开始请求 c.com&#34;)
+</span></span><span class="line"><span class="ln">18</span><span class="cl">                    └── await asyncio.sleep(1)  暂停
+</span></span><span class="line"><span class="ln">19</span><span class="cl">
+</span></span><span class="line"><span class="ln">20</span><span class="cl">        约 1 秒后：
+</span></span><span class="line"><span class="ln">21</span><span class="cl">
+</span></span><span class="line"><span class="ln">22</span><span class="cl">        ├── fetch(&#34;a.com&#34;) 恢复，return 结果
+</span></span><span class="line"><span class="ln">23</span><span class="cl">        ├── fetch(&#34;b.com&#34;) 恢复，return 结果
+</span></span><span class="line"><span class="ln">24</span><span class="cl">        └── fetch(&#34;c.com&#34;) 恢复，return 结果
+</span></span><span class="line"><span class="ln">25</span><span class="cl">
+</span></span><span class="line"><span class="ln">26</span><span class="cl">        gather 收集三个结果
+</span></span><span class="line"><span class="ln">27</span><span class="cl">        └── main() 恢复
+</span></span><span class="line"><span class="ln">28</span><span class="cl">            ├── 计算 elapsed
+</span></span><span class="line"><span class="ln">29</span><span class="cl">            ├── print(results)
+</span></span><span class="line"><span class="ln">30</span><span class="cl">            └── main() 结束
+</span></span><span class="line"><span class="ln">31</span><span class="cl">
+</span></span><span class="line"><span class="ln">32</span><span class="cl">    asyncio.run() 关闭事件循环
+</span></span></code></pre></div><h2 id="task">Task</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kn">import</span> <span class="nn">asyncio</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="s2">&#34;&#34;&#34;模拟请求，delay 秒后返回&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;    [</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">] 开始 (需 </span><span class="si">{</span><span class="n">delay</span><span class="si">}</span><span class="s2">s)&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;    [</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">] 完成&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;[</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">]&#34;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">
+</span></span><span class="line"><span class="ln">11</span><span class="cl">
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;=&#34;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;create_task 演示：</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="c1"># ── 发射两个后台任务 ──────────────────────────</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;主: 发射任务 a 和 b...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="n">task_a</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="n">task_b</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;b.com&#34;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">
+</span></span><span class="line"><span class="ln">21</span><span class="cl">    <span class="c1"># task_a 和 task_b 已经在后台跑了！</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">    <span class="c1"># 主协程可以继续干自己的事：</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;主: 任务在后台跑着，我干点别的...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;主: 0.5s 过去了，任务还在跑</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">
+</span></span><span class="line"><span class="ln">27</span><span class="cl">    <span class="c1"># 现在需要 b 的结果了——await 它</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;主: 等等 b 的结果...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">    <span class="n">result_b</span> <span class="o">=</span> <span class="k">await</span> <span class="n">task_b</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;主: b 的结果 → </span><span class="si">{</span><span class="n">result_b</span><span class="si">}</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">
+</span></span><span class="line"><span class="ln">32</span><span class="cl">    <span class="c1"># 再等 a</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;主: 等等 a 的结果...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">    <span class="n">result_a</span> <span class="o">=</span> <span class="k">await</span> <span class="n">task_a</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;主: a 的结果 → </span><span class="si">{</span><span class="n">result_a</span><span class="si">}</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">36</span><span class="cl">
+</span></span><span class="line"><span class="ln">37</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;主: 全部完成！&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">38</span><span class="cl">
+</span></span><span class="line"><span class="ln">39</span><span class="cl">
+</span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="c1"># ── 启动 </span>
+</span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</span></span></code></pre></div><p>重点在</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl">    <span class="n">task_a</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="n">task_b</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;b.com&#34;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">))</span>
+</span></span></code></pre></div><p>和以下代码做出区别</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl">    <span class="n">task_x</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span></span></code></pre></div><p>后者是停下当前的协程函数，必须马上阻塞，等待<code>fetch</code>完成后才能继续执行</p>
+<p>前者是先创建一个任务，注册到事件循环中</p>
+<p><strong>但是我此时先不等他们完成</strong></p>
+<p>我可以继续往下做我这个协程需要做的事情</p>
+<p>一旦后续有机会，事件循环自然会趁机去把注册好的任务调度完成</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln"> 1</span><span class="cl">全局代码
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">└── asyncio.run(main())
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    └── event loop
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">        └── main()
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">            ├── print(...)
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">            ├── task_a = create_task(fetch(&#34;a.com&#34;, 2))
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">            │   └── Task A 被注册到事件循环
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">            │
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">            ├── task_b = create_task(fetch(&#34;b.com&#34;, 1.5))
+</span></span><span class="line"><span class="ln">10</span><span class="cl">            │   └── Task B 被注册到事件循环
+</span></span><span class="line"><span class="ln">11</span><span class="cl">            │
+</span></span><span class="line"><span class="ln">12</span><span class="cl">            ├── print(&#34;主: 任务在后台...&#34;)
+</span></span><span class="line"><span class="ln">13</span><span class="cl">            └── await asyncio.sleep(0.5)
+</span></span><span class="line"><span class="ln">14</span><span class="cl">                └── main 暂停，事件循环调度其他 Task
+</span></span><span class="line"><span class="ln">15</span><span class="cl">
+</span></span><span class="line"><span class="ln">16</span><span class="cl">        Task A:
+</span></span><span class="line"><span class="ln">17</span><span class="cl">        └── fetch(&#34;a.com&#34;, 2)
+</span></span><span class="line"><span class="ln">18</span><span class="cl">            ├── print(&#34;[a.com] 开始&#34;)
+</span></span><span class="line"><span class="ln">19</span><span class="cl">            └── await asyncio.sleep(2)
+</span></span><span class="line"><span class="ln">20</span><span class="cl">                └── Task A 暂停
+</span></span><span class="line"><span class="ln">21</span><span class="cl">
+</span></span><span class="line"><span class="ln">22</span><span class="cl">        Task B:
+</span></span><span class="line"><span class="ln">23</span><span class="cl">        └── fetch(&#34;b.com&#34;, 1.5)
+</span></span><span class="line"><span class="ln">24</span><span class="cl">            ├── print(&#34;[b.com] 开始&#34;)
+</span></span><span class="line"><span class="ln">25</span><span class="cl">            └── await asyncio.sleep(1.5)
+</span></span><span class="line"><span class="ln">26</span><span class="cl">                └── Task B 暂停
+</span></span><span class="line"><span class="ln">27</span><span class="cl">
+</span></span><span class="line"><span class="ln">28</span><span class="cl">        0.5 秒后：
+</span></span><span class="line"><span class="ln">29</span><span class="cl">
+</span></span><span class="line"><span class="ln">30</span><span class="cl">        main 恢复
+</span></span><span class="line"><span class="ln">31</span><span class="cl">        ├── print(&#34;0.5s 过去了&#34;)
+</span></span><span class="line"><span class="ln">32</span><span class="cl">        └── await task_b
+</span></span><span class="line"><span class="ln">33</span><span class="cl">            └── main 暂停，等待 Task B
+</span></span><span class="line"><span class="ln">34</span><span class="cl">
+</span></span><span class="line"><span class="ln">35</span><span class="cl">        1.5 秒后：
+</span></span><span class="line"><span class="ln">36</span><span class="cl">
+</span></span><span class="line"><span class="ln">37</span><span class="cl">        Task B 恢复
+</span></span><span class="line"><span class="ln">38</span><span class="cl">        ├── print(&#34;[b.com] 完成&#34;)
+</span></span><span class="line"><span class="ln">39</span><span class="cl">        └── return &#34;[b.com]&#34;
+</span></span><span class="line"><span class="ln">40</span><span class="cl">
+</span></span><span class="line"><span class="ln">41</span><span class="cl">        main 恢复
+</span></span><span class="line"><span class="ln">42</span><span class="cl">        ├── result_b = &#34;[b.com]&#34;
+</span></span><span class="line"><span class="ln">43</span><span class="cl">        ├── print(&#34;b 的结果&#34;)
+</span></span><span class="line"><span class="ln">44</span><span class="cl">        └── await task_a
+</span></span><span class="line"><span class="ln">45</span><span class="cl">            └── main 暂停，等待 Task A
+</span></span><span class="line"><span class="ln">46</span><span class="cl">
+</span></span><span class="line"><span class="ln">47</span><span class="cl">        2.0 秒后：
+</span></span><span class="line"><span class="ln">48</span><span class="cl">
+</span></span><span class="line"><span class="ln">49</span><span class="cl">        Task A 恢复
+</span></span><span class="line"><span class="ln">50</span><span class="cl">        ├── print(&#34;[a.com] 完成&#34;)
+</span></span><span class="line"><span class="ln">51</span><span class="cl">        └── return &#34;[a.com]&#34;
+</span></span><span class="line"><span class="ln">52</span><span class="cl">
+</span></span><span class="line"><span class="ln">53</span><span class="cl">        main 恢复
+</span></span><span class="line"><span class="ln">54</span><span class="cl">        ├── result_a = &#34;[a.com]&#34;
+</span></span><span class="line"><span class="ln">55</span><span class="cl">        ├── print(&#34;a 的结果&#34;)
+</span></span><span class="line"><span class="ln">56</span><span class="cl">        └── main 结束
+</span></span></code></pre></div><blockquote>
+<p><code>gather()</code> 适合：</p>
+<ul>
+<li>我已经知道要并发哪些任务，并且要一起等它们全部完成。</li>
+<li>批量完成任务（任务明确可知）</li>
+</ul>
+<p><code>create_task()</code> 适合：</p>
+<ul>
+<li>我想先启动任务，让它在后台跑；主协程继续做别的事，需要结果时再回来等它。</li>
+<li>动态添加任务（任务数量随着时间变化）</li>
+</ul>
+</blockquote>
+<h2 id="exception">Exception</h2>
+<p>协程函数的异常，可以由<code>await</code>处进行捕获</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;bad.com&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;   捕获到异常: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="c1"># 输出：捕获到异常: 💥 bad.com 炸了！</span>
+</span></span></code></pre></div><p>由<code>gather</code>发起的多个协程，可以分别获取</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln"> 1</span><span class="cl">    <span class="c1"># ── 2. gather 默认行为：异常传播 ────────────────</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">2. gather 默认——有异常就中断：&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">        <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">            <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">            <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;bad.com&#34;</span><span class="p">),</span>   <span class="c1"># ⚠️ 这个炸了</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">            <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;c.com&#34;</span><span class="p">),</span>     <span class="c1"># 这个还是会跑完，但结果被丢弃</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;   gather 抛出异常: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="c1"># 注意：a.com 和 c.com 不会被取消，会继续跑完</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    <span class="c1"># ── 3. return_exceptions=True ──────────────────</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">3. return_exceptions=True——不中断：&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">        <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;a.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">        <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;bad.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">        <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;c.com&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">        <span class="n">return_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>   <span class="c1"># ← 关键！</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;   第 </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> 个失败了: </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;   第 </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> 个成功: </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span></code></pre></div><p>同时可以加上timeout机制</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl">	<span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">            <span class="n">fetch</span><span class="p">(</span><span class="s2">&#34;slow.com&#34;</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>  <span class="c1"># 要 5 秒</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">            <span class="n">timeout</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>                  <span class="c1"># 但只等 1 秒</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl">    <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">7</span><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;  ⏰ 等了 1 秒还没结果，放弃了！&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">8</span><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+</span></span></code></pre></div><h2 id="同步">同步</h2>
+<p>在协程函数里使用同步的代码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">bad_fetch</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="s2">&#34;&#34;&#34;❌ 用了 time.sleep——同步阻塞！&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;    [</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">] 开始&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>          <span class="c1"># ⚠️ 卡死整个事件循环 1 秒！</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;    [</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">] 完成&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl">    <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;[</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">]&#34;</span>
+</span></span></code></pre></div><p>整个事件循环的线程，都会被卡死1s</p>
+<p>因此必须使用支持异步版本的代码</p>
+<p>如果实在没有异步版本</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="ln">1</span><span class="cl">    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">        <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">blocking_io</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">        <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">blocking_io</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">        <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">blocking_io</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="p">)</span>
+</span></span></code></pre></div><p>用 asyncio.to_thread() 把同步调用扔到线程池</p>
+<h2 id="pattern">Pattern</h2>
+<p>实际使用可以采用现成的异步pattern</p>
+<blockquote>
+<p><em># 模式 1：限量并发   → Semaphore</em></p>
+<p><em># 模式 2：生产者-消费者 → asyncio.Queue</em></p>
+<p><em># 模式 3：竞速     → asyncio.wait(FIRST_COMPLETED)</em></p>
+<p><em># 模式 4：优雅取消   → try/except CancelledError</em></p>
+</blockquote>
+<p>这里GPT一下就知道</p>
+]]></content:encoded></item></channel></rss>
