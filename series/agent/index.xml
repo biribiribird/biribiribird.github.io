@@ -1,4 +1,244 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Agent on BiribiriBird</title><link>https://biribiribird.top/series/agent/</link><description>Recent content in Agent on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sat, 23 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/agent/index.xml" rel="self" type="application/rss+xml"/><item><title>转生为Agent高手(三) Multi-agent research system. How and Avoid</title><link>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</link><pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</guid><description>&lt;p&gt;&lt;a href="https://www.anthropic.com/engineering/multi-agent-research-system"&gt;Anthropic &amp;mdash; How we built our multi-agent research system&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Agent on BiribiriBird</title><link>https://biribiribird.top/series/agent/</link><description>Recent content in Agent on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sat, 11 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/agent/index.xml" rel="self" type="application/rss+xml"/><item><title>论文阅读高手 · 从2022年开始溯源的Agent起点 · 小综述</title><link>https://biribiribird.top/posts/agent_initial_paper_review/</link><pubDate>Sat, 11 Jul 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agent_initial_paper_review/</guid><description>&lt;h2 id="reasoning-1-chain-of-thought-prompting-elicits-reasoning-in-large-language-models"&gt;[Reasoning 1] Chain-of-Thought Prompting Elicits Reasoning in Large Language Models&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://arxiv.org/abs/2201.11903"&gt;ArXiv 2201.11903&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="intro"&gt;Intro&lt;/h3&gt;
+&lt;p&gt;In-Context Learning已经发现模型会根据few-shot示例进行&lt;strong&gt;模式上的模仿&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;对于比较简单的任务有效，面对复杂的数学题等，模型参数加大也无法取得很好的效果&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="reasoning-1-chain-of-thought-prompting-elicits-reasoning-in-large-language-models">[Reasoning 1] Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</h2>
+<p><a href="https://arxiv.org/abs/2201.11903">ArXiv 2201.11903</a></p>
+<h3 id="intro">Intro</h3>
+<p>In-Context Learning已经发现模型会根据few-shot示例进行<strong>模式上的模仿</strong></p>
+<p>对于比较简单的任务有效，面对复杂的数学题等，模型参数加大也无法取得很好的效果</p>
+<p>已有的方法</p>
+<ul>
+<li>给模型大量<strong>问题—推理过程—答案</strong>数据，进行训练
+<ul>
+<li>缺点：贵</li>
+</ul>
+</li>
+<li>直接 Few-shot Prompting
+<ul>
+<li>缺点：相当于让模型通过单次前向传播，在参数内部进行推理，但是一旦语义和计算产生偏差，最后的结果往往不好</li>
+</ul>
+</li>
+</ul>
+<p>模型往往只能通过Few-Shot了解输出的格式，而无法学会求解过程</p>
+<h3 id="idea">Idea</h3>
+<ul>
+<li>核心想法：解决问题应该是拆成<strong>多个步骤</strong></li>
+</ul>
+<p>不要试图让模型单次前向传播做过于复杂的内容</p>
+<ul>
+<li>核心假设
+<ul>
+<li>模型是知道怎么推理的，也具备这个能力，关键就是如何激发这个能力</li>
+<li>标准 Prompt 需要提供合适的输出结构来激活它、留有思考空间</li>
+</ul>
+</li>
+</ul>
+<p>最重要的思想转变不是<strong>多写一些解释</strong>，而是：</p>
+<blockquote>
+<p><strong>把自然语言 token 当作模型的计算空间。</strong></p>
+</blockquote>
+<p><img loading="lazy" src="/posts/agent_initial_paper_review/assets/image-20260711182248634.png"></p>
+<p>因此作者尝试在Prompt的示例中添加CoT</p>
+<p>让模型已模式模仿的形式，也会在输出时进行一定的CoT输出，从而进行了显式的推理</p>
+<p>这个方法某种程度激发了模型的潜在推理能力</p>
+<h3 id="exp">Exp</h3>
+<p>有一个有趣的实验现象（注意是2022年的模型）</p>
+<ul>
+<li>小模型CoT反而降低水平</li>
+<li>大模型CoT确实有提升</li>
+</ul>
+<p>因此CoT方法不会为模型带来推理能力的提升，而是激发了模型本身的能力</p>
+<p>小模型不具备这个能力，因此没有什么效果</p>
+<h3 id="limits">Limits</h3>
+<ul>
+<li>对于模型仍然是单次的输出，因此过于复杂的任务，无法通过一次CoT想明白（状态、步骤没法被很好的切分）</li>
+</ul>
+<h2 id="planning-1-language-models-as-zero-shot-planners-extracting-actionable-knowledge-for-embodied-agents">[Planning 1] Language Models as Zero-Shot Planners: Extracting Actionable Knowledge for Embodied Agents</h2>
+<p><a href="https://arxiv.org/pdf/2201.07207">2201.07207</a></p>
+<h3 id="intro-1">Intro</h3>
+<p>以往LLM只用来处理NLP任务</p>
+<h3 id="idea-1">Idea</h3>
+<p>LLM从大量数据集中必然已经知道一些生活中的任务是有什么顺序的</p>
+<p>也就是<strong>人类通常怎么完成某个任务</strong></p>
+<p>核心假设：大型语言模型已经从文本中隐式学到了大量“如何完成日常任务”的程序性知识。</p>
+<p>核心想法：让冻结的 LLM 生成计划，再把自由语言计划翻译成环境允许的原子动作。</p>
+<br>
+<p>这篇论文挖掘了LLM内部知识，证明了LLM可以成为Agent的高层规划器</p>
+<h2 id="agent-1-react-synergizing-reasoning-and-acting-in-language-models">[Agent 1] ReAct: Synergizing Reasoning and Acting in Language Models</h2>
+<p><a href="https://arxiv.org/pdf/2210.03629">2210.03629</a></p>
+<p>奠基之作</p>
+<h3 id="intro-2">Intro</h3>
+<p>当时的技术路线</p>
+<ul>
+<li>LLM CoT
+<ul>
+<li>无法接触外部世界</li>
+</ul>
+</li>
+<li>LLM Action：观察环境 -&gt; 执行动作 -&gt; &hellip;循环
+<ul>
+<li>缺少推理</li>
+</ul>
+</li>
+</ul>
+<p>对于人类来说做事应该是：</p>
+<ul>
+<li>先想一下，做一个动作，看看结果，再根据结果继续思考</li>
+</ul>
+<h3 id="idea-2">Idea</h3>
+<p>作者认为Agent应该具备如下能力</p>
+<ul>
+<li>Reasoning：决定为什么这样做</li>
+<li>Acting：真正影响或查询外部环境</li>
+<li>Observation：接收行动产生的真实反馈</li>
+</ul>
+<blockquote>
+<p>Reasoning某种程度上承担了一些记忆、规划的工作</p>
+<p>同时只改变内部上下文，不会对外界造成改变</p>
+<p>Agent具备了Action和Reasoning的两种动作</p>
+</blockquote>
+<h2 id="reasoning-2-self-consistency-improves-chain-of-thought-reasoning-in-language-models">[Reasoning 2] Self-Consistency Improves Chain of Thought Reasoning in Language Models</h2>
+<p><a href="https://arxiv.org/pdf/2203.11171">2203.11171</a></p>
+<h3 id="intro-3">Intro</h3>
+<p>前序工作：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">CoT Prompt
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    ↓
+</span></span><span class="line"><span class="ln">3</span><span class="cl">模型生成唯一一条推理链
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    ↓
+</span></span><span class="line"><span class="ln">5</span><span class="cl">得到唯一答案
+</span></span></code></pre></div><p>基本采用的是<code>Greedy Decoding</code>（每次采用概率最高的token进行推理）</p>
+<p>因此很容易产生错误累积，模型推理产生了思考，但没有检测思考是否正确</p>
+<hr>
+<p>已有的方法是<strong>训练额外的 verifier</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">模型生成多个答案
+</span></span><span class="line"><span class="ln">2</span><span class="cl">        ↓
+</span></span><span class="line"><span class="ln">3</span><span class="cl">另一个验证模型进行评分
+</span></span><span class="line"><span class="ln">4</span><span class="cl">        ↓
+</span></span><span class="line"><span class="ln">5</span><span class="cl">选择最高分答案
+</span></span></code></pre></div><p>但是肯定比较需要成本与数据质量</p>
+<p>作者的方法是：不训练任何新模型，仅利用同一个 LLM <strong>自身输出的分布</strong>完成筛选</p>
+<h3 id="idea-3">Idea</h3>
+<p><strong>核心假设：提升的关键不是“找更多高概率表达”，而是“探索真正不同的推理路径，并观察答案是否汇聚”。</strong></p>
+<p>希望拦截的是：<strong>偶然的中间错误</strong></p>
+<p><img loading="lazy" src="/posts/agent_initial_paper_review/assets/image-20260711202302845.png"></p>
+<p>通过：温度、topK、topP等参数，完成采样，进行投票。</p>
+<ul>
+<li>温度：温度越高，概率分布会更平缓，反之会更尖锐</li>
+<li>topK：选择概率最高的K个，重新归一化概率后再随机取样</li>
+<li>topP：在<strong>概率累积到P的最小集合</strong>中进行采样</li>
+</ul>
+<blockquote>
+<p>The answer is xxx. 是固定写法，直接解析这一句话提取答案</p>
+</blockquote>
+<h3 id="limits-1">Limits</h3>
+<ul>
+<li>它能过滤随机错误，但无法保证中间过程正确，也无法修复模型共同持有的系统性错误。</li>
+</ul>
+<h2 id="reasoning-3-tree-of-thoughts-deliberate-problem-solving-with-large-language-models">[Reasoning 3] Tree of Thoughts: Deliberate Problem Solving with Large Language Models</h2>
+<p><a href="https://arxiv.org/pdf/2305.10601">2305.10601</a></p>
+<h3 id="intro-4">Intro</h3>
+<p>Self-Consistency虽然通过推理多样性，一定程度解决了推理过程中的偶然错误的问题</p>
+<p>但是对于单条CoT，仍然无法避免中间错误积累到后续答案</p>
+<h3 id="idea-4">Idea</h3>
+<ul>
+<li>将推理拆成多个中间推理状态</li>
+<li>用 LLM Judge 对各候选打分（如：好 / 坏 / 有潜力）</li>
+<li>进行BFS/DFS进行探索</li>
+</ul>
+<p><img loading="lazy" src="/posts/agent_initial_paper_review/assets/image-20260711232955284.png"></p>
+<p>这样本质上推理是可以回溯的</p>
+<h2 id="reasoning-4-self-refine-iterative-refinement-with-self-feedback">[Reasoning 4] SELF-REFINE: Iterative Refinement with Self-Feedback</h2>
+<p><a href="https://arxiv.org/pdf/2303.17651v2">2303.17651v2</a></p>
+<blockquote>
+<p><strong>代表了Reflection架构</strong></p>
+</blockquote>
+<h3 id="intro-5">Intro</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">Prompt Engineering
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">        ↓
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">Chain-of-Thought
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">让模型写出推理过程
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">        ↓
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">Self-Consistency
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">尝试多条推理路径并投票
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        ↓
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">ReAct
+</span></span><span class="line"><span class="ln">10</span><span class="cl">推理与环境行动交替进行
+</span></span></code></pre></div><p>早期工作致力于如何让模型：</p>
+<ul>
+<li>如何生成更好的答案</li>
+<li>如何更好的探索路径</li>
+<li>如何更好的与环境交互</li>
+</ul>
+<p>但是都基于一个隐藏假设：<strong>模型第一次给出的答案，就是当前链条的结果，不再更改</strong></p>
+<h3 id="idea-5">Idea</h3>
+<p>核心假设：<strong>模型能产生好答案</strong>与<strong>模型第一次输出就是好答案</strong>是不一样的</p>
+<p>给模型的Prompt中可能存在非常多条件</p>
+<p>但是模型的第一次输出，可能会有一些对条件满足质量的参差不齐</p>
+<p>因此应该给模型机会，让模型自己去调整、优化</p>
+<p><img loading="lazy" src="/posts/agent_initial_paper_review/assets/image-20260712160444536.png"></p>
+<p>完整流程：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">生成初始答案 y₀
+</span></span><span class="line"><span class="ln">2</span><span class="cl">
+</span></span><span class="line"><span class="ln">3</span><span class="cl">for t = 0, 1, 2, ...:
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    fbₜ = Feedback(x, yₜ)
+</span></span><span class="line"><span class="ln">5</span><span class="cl">
+</span></span><span class="line"><span class="ln">6</span><span class="cl">    if 达到任务标准 or t 达到最大轮数:
+</span></span><span class="line"><span class="ln">7</span><span class="cl">        return yₜ
+</span></span><span class="line"><span class="ln">8</span><span class="cl">
+</span></span><span class="line"><span class="ln">9</span><span class="cl">    yₜ₊₁ = Refine(x, 历史答案, 历史反馈)
+</span></span></code></pre></div><h2 id="planning-2-plan-and-solve-prompting-improving-zero-shot-chain-of-thought-reasoning-by-large-language-model">[Planning 2] Plan-and-Solve Prompting: Improving Zero-Shot Chain-of-Thought Reasoning by Large Language Model</h2>
+<h3 id="intro-6">Intro</h3>
+<p>早期CoT需要让模型根据few-shot示例模仿进行思考</p>
+<p>随着模型指令遵循能力的上升，实质上只需要<code>Let's think step by step.</code></p>
+<p>相当于进行了zero-shot的CoT</p>
+<h3 id="idea-6">Idea</h3>
+<p>核心假设：很多错误不是因为模型完全不会推理，而是因为它没有先明确整个任务需要哪些步骤。</p>
+<p>核心想法：让模型的思考更有结构，防止步骤遗漏</p>
+<br>
+<p>CoT 证明了中间推理有价值。</p>
+<p>Plan-and-Solve 进一步提出：</p>
+<blockquote>
+<p>中间推理本身也应该被组织，而不是任由模型自由展开。</p>
+</blockquote>
+<p>这是从 <strong>Reasoning</strong> 向 <strong>Planning</strong> 的一次重要概念转变。</p>
+<h2 id="planning-3-hugginggpt-solving-ai-tasks-with-chatgpt-and-its-friends-in-hugging-face">[Planning 3] HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face</h2>
+<p><a href="https://arxiv.org/pdf/2303.17580">arxiv.org/pdf/2303.17580</a></p>
+<h3 id="intro-7">Intro</h3>
+<p>早期LLM只专注于文字，对其他模态能力较差</p>
+<p>但是先前工作已经发现LLM具备规划能力，因此似乎可以使用LLM对各个专家模型进行组织</p>
+<h3 id="method">Method</h3>
+<ul>
+<li>
+<p>任务规划：ChatGPT 把用户请求拆解成有依赖顺序的子任务列表，标注每个子任务的输入输出关系。</p>
+</li>
+<li>
+<p>模型选择：从 Hugging Face 模型库检索，让 ChatGPT 根据描述文字选出最适合的模型。</p>
+</li>
+<li>
+<p>任务执行：按依赖顺序调用对应模型的 inference API，上一个子任务的输出作为下一个的输入。</p>
+</li>
+<li>
+<p>结果整合：把所有模型的返回结果收集起来，让 ChatGPT 总结成自然语言回答给用户。</p>
+</li>
+</ul>
+<h2 id="agent-2-reflexion-language-agents-with-verbal-reinforcement-learning">[Agent 2] Reflexion: Language Agents with Verbal Reinforcement Learning</h2>
+<p><a href="https://arxiv.org/pdf/2303.11366">2303.11366</a></p>
+<h3 id="intro-8">Intro</h3>
+<p>之前的工作在单个任务上失败后，在第二次尝试大概率也会出错</p>
+<p>ReAct在单次任务中，能够通过当前环境的反馈，动态调整行动</p>
+<p>但不过报错信息并不能足够丰富，可能会只是一个<code>success/fail</code>，能从环境中获取的奖励非常有限</p>
+<hr>
+<p>通过RL进行训练代价极高</p>
+<p>而LLM非常擅长理解语言，那么能不能把奖励转化为语言呢</p>
+<h3 id="idea-7">Idea</h3>
+<p><img loading="lazy" src="/posts/agent_initial_paper_review/assets/image-20260712205023951.png"></p>
+<ul>
+<li>Actor：实际上可以使用ReAct作为一次尝试的Actor</li>
+<li>Evaluator：用于根据Actor的一次轨迹，生成奖励（判断这次尝试做的怎么样，值多少分）</li>
+<li>Self-Reflection：根据轨迹、奖励，生成经验总结，放入到内存中</li>
+</ul>
+]]></content:encoded></item><item><title>转生为Agent高手(三) Multi-agent research system. How and Avoid</title><link>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</link><pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/agentnote-3-multi-agent-research-system/</guid><description>&lt;p&gt;&lt;a href="https://www.anthropic.com/engineering/multi-agent-research-system"&gt;Anthropic &amp;mdash; How we built our multi-agent research system&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://cognition.ai/blog/dont-build-multi-agents"&gt;Don’t Build Multi-Agents | Cognition&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;这次我们同时看两篇文章，进行对照&lt;/p&gt;
 &lt;h1 id="intro"&gt;Intro&lt;/h1&gt;

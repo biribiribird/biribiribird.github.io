@@ -1,4 +1,68 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ClaudeCode学习笔记 on BiribiriBird</title><link>https://biribiribird.top/series/claudecode%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link><description>Recent content in ClaudeCode学习笔记 on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Mon, 08 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/claudecode%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.xml" rel="self" type="application/rss+xml"/><item><title>Claude Code学习笔记（七）· SubAgent</title><link>https://biribiribird.top/posts/claudecode-learning-note-7-subagent/</link><pubDate>Mon, 08 Jun 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-7-subagent/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s06_subagent"&gt;learn-claude-code/s06_subagent at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>ClaudeCode学习笔记 on BiribiriBird</title><link>https://biribiribird.top/series/claudecode%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link><description>Recent content in ClaudeCode学习笔记 on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 09 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/claudecode%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.xml" rel="self" type="application/rss+xml"/><item><title>Claude Code学习笔记（九）· Compact</title><link>https://biribiribird.top/posts/claudecode-learning-note-9-compact/</link><pubDate>Thu, 09 Jul 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-9-compact/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s08_context_compact"&gt;learn-claude-code/s08_context_compact at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;</description><content:encoded>&lt;p>&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s08_context_compact">learn-claude-code/s08_context_compact at main · shareAI-lab/learn-claude-code&lt;/a>&lt;/p>
+</content:encoded></item><item><title>Claude Code学习笔记（八）· SKill</title><link>https://biribiribird.top/posts/claudecode-learning-note-8-skill/</link><pubDate>Wed, 08 Jul 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-8-skill/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s07_skill_loading"&gt;learn-claude-code/s07_skill_loading at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;skill作为指导模型完成某些任务的详细指南，因此不太适合一开始全部加载到system_prompt中&lt;/p&gt;
+&lt;p&gt;事先读取指定目录&lt;code&gt;skills/&lt;/code&gt;，根据协商好的格式，提取&lt;code&gt;name&lt;/code&gt;等必要信息&lt;/p&gt;</description><content:encoded><![CDATA[<p><a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s07_skill_loading">learn-claude-code/s07_skill_loading at main · shareAI-lab/learn-claude-code</a></p>
+<p>skill作为指导模型完成某些任务的详细指南，因此不太适合一开始全部加载到system_prompt中</p>
+<p>事先读取指定目录<code>skills/</code>，根据协商好的格式，提取<code>name</code>等必要信息</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln">1</span><span class="cl">- **code-review**: Review code carefully
+</span></span><span class="line"><span class="ln">2</span><span class="cl">- **pdf**: Work with PDF files
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl">Use load_skill to get full details when needed.
+</span></span></code></pre></div><p>将可以加载的skill塞入system prompt</p>
+<p>将<code>load_skill</code>作为一个工具，可以读取指定skill文本</p>
+<hr>
+<p>Claude Code会将Skill分别管理在不同位置</p>
+<ul>
+<li>user</li>
+<li>project</li>
+<li>……</li>
+</ul>
+<p>常见的skill字段</p>
+<table>
+  <thead>
+      <tr>
+          <th>字段</th>
+          <th>用途</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>name</code> / <code>description</code></td>
+          <td>显示名称和描述</td>
+      </tr>
+      <tr>
+          <td><code>when_to_use</code></td>
+          <td>指导模型何时调用</td>
+      </tr>
+      <tr>
+          <td><code>allowed-tools</code></td>
+          <td>技能可用工具的自动允许列表</td>
+      </tr>
+      <tr>
+          <td><code>context</code></td>
+          <td><code>inline</code>（默认）或 <code>fork</code>（作为子 Agent 运行）</td>
+      </tr>
+      <tr>
+          <td><code>model</code></td>
+          <td>模型覆盖（haiku/sonnet/opus/inherit）</td>
+      </tr>
+      <tr>
+          <td><code>hooks</code></td>
+          <td>技能级别的 hook 配置</td>
+      </tr>
+      <tr>
+          <td><code>paths</code></td>
+          <td>条件激活的 glob 模式</td>
+      </tr>
+      <tr>
+          <td><code>user-invocable</code></td>
+          <td>用户可以通过 <code>/name</code> 调用</td>
+      </tr>
+  </tbody>
+</table>
+<p>并且skill返回的工具结果是<code>&quot;Launching skill: {name}&quot;</code></p>
+<p>真实的skill文本会直接注入到<code>message</code>历史中</p>
+]]></content:encoded></item><item><title>Claude Code学习笔记（七）· SubAgent</title><link>https://biribiribird.top/posts/claudecode-learning-note-7-subagent/</link><pubDate>Mon, 08 Jun 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/claudecode-learning-note-7-subagent/</guid><description>&lt;p&gt;&lt;a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s06_subagent"&gt;learn-claude-code/s06_subagent at main · shareAI-lab/learn-claude-code&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;我们不希望上下文中有太多探索的记录，这会成为噪音&lt;/p&gt;
 &lt;p&gt;因此对于Agent，可以生成subagent，专门去在一个任务上充分探索&lt;/p&gt;
 &lt;p&gt;最后返回结果给主agent即可&lt;/p&gt;</description><content:encoded><![CDATA[<p><a href="https://github.com/shareAI-lab/learn-claude-code/tree/main/s06_subagent">learn-claude-code/s06_subagent at main · shareAI-lab/learn-claude-code</a></p>
