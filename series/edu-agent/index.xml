@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Edu Agent on BiribiriBird</title><link>https://biribiribird.top/series/edu-agent/</link><description>Recent content in Edu Agent on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Mon, 13 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/edu-agent/index.xml" rel="self" type="application/rss+xml"/><item><title>论文阅读高手 · 教育论文笔记（一）</title><link>https://biribiribird.top/posts/edu_agent_paper_review/</link><pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/edu_agent_paper_review/</guid><description>&lt;p&gt;[TOC]&lt;/p&gt;
+&lt;h2 id="conversational-learning-diagnosis-via-reasoning-multi-turn-interactive-learning"&gt;Conversational Learning Diagnosis via Reasoning Multi-Turn Interactive Learning&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://arxiv.org/pdf/2603.03236"&gt;https://arxiv.org/pdf/2603.03236&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;AAAI 2026&lt;/p&gt;
+&lt;h3 id="intro"&gt;Intro&lt;/h3&gt;
+&lt;p&gt;对话式学习非常要求教师&lt;strong&gt;持续判断学生当前的认知状态&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id="q1"&gt;Q1&lt;/h4&gt;
+&lt;p&gt;已有的认知状态建模方法，如知识追踪，是离散化的标签形式&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;题目 1：答对
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;2&lt;/span&gt;&lt;span class="cl"&gt;题目 2：答错
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;3&lt;/span&gt;&lt;span class="cl"&gt;题目 3：答对
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;离散标签不适合对话教学，无法提供足够的上下文&lt;/p&gt;</description><content:encoded><![CDATA[<p>[TOC]</p>
+<h2 id="conversational-learning-diagnosis-via-reasoning-multi-turn-interactive-learning">Conversational Learning Diagnosis via Reasoning Multi-Turn Interactive Learning</h2>
+<p><a href="https://arxiv.org/pdf/2603.03236">https://arxiv.org/pdf/2603.03236</a></p>
+<p>AAAI 2026</p>
+<h3 id="intro">Intro</h3>
+<p>对话式学习非常要求教师<strong>持续判断学生当前的认知状态</strong></p>
+<h4 id="q1">Q1</h4>
+<p>已有的认知状态建模方法，如知识追踪，是离散化的标签形式</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">题目 1：答对
+</span></span><span class="line"><span class="ln">2</span><span class="cl">题目 2：答错
+</span></span><span class="line"><span class="ln">3</span><span class="cl">题目 3：答对
+</span></span></code></pre></div><p>离散标签不适合对话教学，无法提供足够的上下文</p>
+<p>同时认知状态在对话中是不断变化的</p>
+<h4 id="q2">Q2</h4>
+<p>已有的AI tutor将<strong>认知状态</strong>作为最终教师回复的中间步骤</p>
+<p>尚未独立研究认知状态的有效性、是否可靠，同时不够细粒度</p>
+<p>难以验证</p>
+<h3 id="method">Method</h3>
+<p><img loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260716163025382.png"></p>
+<p>核心框架：<br>
+$$<br>
+Previewer\to Analyzer\to Reasoner \to Reflector<br>
+$$</p>
+<h4 id="behavior-previewer-行为模式的假设空间">Behavior Previewer 行为模式的假设空间</h4>
+<p>$$<br>
+B_t = LLM(S_{t-1},e,K_e,P_b)<br>
+$$<br>
+输入：</p>
+<ul>
+<li>$S_{t-1}$：第$t-1$轮的<strong>认知状态</strong></li>
+<li>$e$：当前正在教学的问题</li>
+<li>$K_e$：解决$e$需要涉及的相关知识点</li>
+</ul>
+<p>论文在这里先不做诊断，而是为后续诊断提供一个<strong>行为模式的假设空间</strong></p>
+<hr>
+<p>论文参考了ZPD-Behavior Schema理论（Zone of Proximal Development）</p>
+<p>根据学生的认知状态、题目、相关知识点，将学生接下来可能的行为分为三类</p>
+<blockquote>
+<p>注意，是指可能会做出的<strong>行为</strong>，而不是是否做出整道题目</p>
+</blockquote>
+<ul>
+<li>Mastered：根据学生先前认知状态，预计学生<strong>已经能够</strong>表现出来的行为。</li>
+<li>Acquirable：学生目前未必能独立完成，但<strong>经过教师指导</strong>后可能完成的行为。</li>
+<li>Inaccessible：即使教师给予指导，学生目前仍<strong>无法完成</strong>的行为。</li>
+</ul>
+<hr>
+<p>输出</p>
+<ul>
+<li>$B_t$
+<ul>
+<li>具体的行为描述</li>
+<li>该行为对应的知识点$KC \in K_e$</li>
+</ul>
+</li>
+</ul>
+<p>输出的格式大致上是：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln"> 1</span><span class="cl">Mastered
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">- 1
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">  - Behavior: 学生能够计算餐饮原价：80 + 10 = 90
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">  - Associated KCs: Addition
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">- 2
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  - Behavior: 学生能够计算税额：90 × 10% = 9
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">  - Associated KCs: Percentage
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">
+</span></span><span class="line"><span class="ln">10</span><span class="cl">Acquirable
+</span></span><span class="line"><span class="ln">11</span><span class="cl">- 1
+</span></span><span class="line"><span class="ln">12</span><span class="cl">  - Behavior: 在教师提示“从总账单中减去含税餐饮金额”后，学生能够完成：140 - 99 = 41
+</span></span><span class="line"><span class="ln">13</span><span class="cl">  - Associated KCs: Subtraction
+</span></span><span class="line"><span class="ln">14</span><span class="cl">
+</span></span><span class="line"><span class="ln">15</span><span class="cl">Inaccessible
+</span></span><span class="line"><span class="ln">16</span><span class="cl">- 1
+</span></span><span class="line"><span class="ln">17</span><span class="cl">  - Behavior: 即使教师指出需要使用减法，学生仍无法确定被减数和减数，也无法解释所得差值为何是小费。
+</span></span><span class="line"><span class="ln">18</span><span class="cl">  - Associated KCs: Subtraction
+</span></span></code></pre></div><h4 id="state-analyzer">State Analyzer</h4>
+<p>$$<br>
+S_t = LLM(S_{t-1},B_t,d_t,e,P_a)<br>
+$$<br>
+输入</p>
+<ul>
+<li>第$t$轮的对话记录$d_t$​​：必然是（教师，学生）的一个对话pair</li>
+</ul>
+<p>输出</p>
+<ul>
+<li>$S_t$​是一个结构化的 key-value 表示，针对每一个<code>KC</code>
+<ul>
+<li><code>level</code>：该知识点掌握等级（<code>Good</code>、<code>Fair</code>、<code>Poor</code>）</li>
+<li><code>explanation</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln"> 1</span><span class="cl">S_1 = {
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  &#34;Addition&#34;: {
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    &#34;level&#34;: &#34;Good&#34;,
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    &#34;explanation&#34;: &#34;The student correctly computes 80 + 10 = 90.&#34;
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">  },
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  &#34;Percentage&#34;: {
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    &#34;level&#34;: &#34;Good&#34;,
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    &#34;explanation&#34;: &#34;The student correctly computes 10% of 90 as 9.&#34;
+</span></span><span class="line"><span class="ln">10</span><span class="cl">  },
+</span></span><span class="line"><span class="ln">11</span><span class="cl">
+</span></span><span class="line"><span class="ln">12</span><span class="cl">  &#34;Subtraction&#34;: {
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    &#34;level&#34;: &#34;Poor&#34;,
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    &#34;explanation&#34;: &#34;The student does not use subtraction to isolate
+</span></span><span class="line"><span class="ln">15</span><span class="cl">                    the gratuity from the total bill.&#34;
+</span></span><span class="line"><span class="ln">16</span><span class="cl">  }
+</span></span><span class="line"><span class="ln">17</span><span class="cl">}
+</span></span></code></pre></div><p>相当于Previewer列出了每个KC的程度，所对应不同级别的行为模式</p>
+<p>Analyzer根据行为模式选择对应的程度</p>
+<blockquote>
+<p>不是使用模型分析学生的认知状态</p>
+<p>而是让学生的认知状态匹配<strong>模型的理解</strong></p>
+<p>这里似乎可以做一个id分配，这样还能检测id对应的级别和模型输出是不是一致的</p>
+<p>从代码层面做匹配</p>
+</blockquote>
+<h4 id="performance-reasoner">Performance Reasoner</h4>
+<p>$$<br>
+y_t = LLM(S_t,e,P_r)<br>
+$$<br>
+根据相关内容预测是否学生能够掌握该问题</p>
+<p>输出</p>
+<ul>
+<li>$y_t$：<code>mastered</code>、<code>not mastered</code></li>
+<li>rationale</li>
+</ul>
+<blockquote>
+<p>注意这个过程，输入只有$S_t$是与学生相关的，没有传入任何对话</p>
+<p>因此这里的假设是，如果$S_t$是准的，那么$y_t$也应该是准的</p>
+</blockquote>
+<h4 id="chain-reflector">Chain Reflector</h4>
+<p>首先先前的内容会进行存储，记为$M_t$</p>
+<p>每一轮的单轮记录$h_t$有：</p>
+<ul>
+<li>当轮的对话信息$d_t$</li>
+<li>$B_t$行为模式假设</li>
+<li>$S_t$：输出的认知状态</li>
+</ul>
+<p>多轮$h_i$组成了完整的$M_t$</p>
+<p>在每个交互轮次中</p>
+<p>当 Performance Reasoner 的预测结果$y_t$</p>
+<p>与观察到的<strong>学生实际表现</strong>之间出现不一致时</p>
+<blockquote>
+<p>MathDial 和 CoMTA两个数据集，对于一轮对话</p>
+<ul>
+<li>学生最终正确解决问题，$r_{ue} = mastered$</li>
+<li>否则，$r_{ue} = not$</li>
+</ul>
+<p>但是实际使用的时候如何得到这个$r$论文没有详细说明</p>
+</blockquote>
+<p>发生冲突时，说明$y_t$的来源$S_t$必然出现了问题</p>
+<p>因此需要进行check</p>
+<p>触发Chain Reflector模块进行检查</p>
+<p>$$<br>
+R = LLM(M_t, P_{reflect})<br>
+$$</p>
+<p>提示词重点判断$B_t$是否为$S_t$提供了充分的依据</p>
+<p>输出：</p>
+<ul>
+<li>是否正确<code>acc</code>、<code>not acc</code></li>
+<li>分析理由</li>
+</ul>
+<blockquote>
+<p>这里论文的逻辑感觉有漏洞</p>
+</blockquote>
+<p>重新调用Analyzer，提供分析理由，重新生成$S_t$</p>
+<p>重复迭代过程</p>
+<blockquote>
+<p>只要$S_t$是对的，那么$y_t$应该是对的</p>
+</blockquote>
+<h3 id="exp">Exp</h3>
+<p>核心假设：只要$S_t$是对的，那么$y_t$应该是对的</p>
+<h4 id="rq1-学生表现预测">RQ1: 学生表现预测</h4>
+<p><img alt="=" loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260716210159830.png"></p>
+<blockquote>
+<p>这里不触发Reflector</p>
+</blockquote>
+<p>比较$y_t$是否和$r_{ue}$一致</p>
+<h4 id="rq3-模拟辅导">RQ3: 模拟辅导</h4>
+<p>确认能否让学生更容易、更快地答对问题</p>
+<p>从数据集中挑选：一直到最后一轮之前都没有答对问题的数据对话</p>
+<p>学生由InstructGPT模拟</p>
+<p>两个基线：</p>
+<ul>
+<li>DA：直接分析认知状态，生成教学提示</li>
+<li>DR：直接根据学生回答生成下一步回复</li>
+</ul>
+<p>评价指标：</p>
+<ul>
+<li>Correct Rate，设定为<code>最终答对的对话数/总对话数</code></li>
+<li>Avg Turns：平均需要多少轮对话</li>
+<li>Intersection Average Turns：三个方法都成功回答正常的数据，平均需要多少轮对话</li>
+</ul>
+<p><img loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260716211023365.png"></p>
+<h4 id="人工标注">人工标注</h4>
+<p>取了一些数据让人工打分</p>
+<h2 id="planning-guided-tutoring-with-assessment-driven-memory-for-pedagogical-llm-tutors">Planning-Guided Tutoring with Assessment-Driven Memory for Pedagogical LLM Tutors</h2>
+<p><a href="https://aclanthology.org/2026.acl-long.325.pdf">2026.acl-long.325.pdf</a></p>
+<p>ACL2026</p>
+<h3 id="intro-1">Intro</h3>
+<p>解题模型的目标通常是：</p>
+<blockquote>
+<p>尽快给出正确答案和推理过程。</p>
+</blockquote>
+<p>而一个教学模型的目标应该是：</p>
+<blockquote>
+<p>根据学生当前的理解程度，逐步引导学生自己构造出解法。</p>
+</blockquote>
+<p>作者认为AI Tutor教学应该坚持<strong>脚手架式教学</strong>的原则，让学生独立完成问题</p>
+<p>核心挑战：</p>
+<ul>
+<li>保持数学推理的严谨性、正确性</li>
+<li>对学生认知状态变化敏感</li>
+</ul>
+<hr>
+<p>早期方法主要通过<strong>提示词</strong>，要求模型扮演教师、遵守教学风格</p>
+<p>但是对话只要变长，模型就会逐渐偏离轨道、失去逻辑</p>
+<p>还有一些工作使用了SFT、RL做优化</p>
+<p>但是他们都有以下问题：</p>
+<ul>
+<li>缺少显式教学规划
+<ul>
+<li>容易导致：前后指导不一致、推理和教学步骤碎片化、过早泄露答案</li>
+</ul>
+</li>
+<li>对学生认知状态的适应不足
+<ul>
+<li>模型容易产生通用化反馈</li>
+</ul>
+</li>
+</ul>
+<h3 id="method-1">Method</h3>
+<p><img loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260717011020544.png"></p>
+<h4 id="planing">Planing</h4>
+<p>给定问题$Q$，有解题步骤：（LLM生成）</p>
+<p>$$<br>
+R(Q) = \left { r_1, r_2, &hellip;, r_n \right }<br>
+$$<br>
+作者对每个步骤$r_i$，构造了一个局部<strong>引导问题和预期答案</strong></p>
+<p>从而得到教学计划：（LLM生成）</p>
+<p>$$<br>
+P(Q) = \left[ (q_1,a_1), &hellip;\right]<br>
+$$</p>
+<h4 id="tutoring">Tutoring</h4>
+<p>对于第$k$轮，已有记忆<br>
+$$<br>
+M_{k-1} = \left ( P(Q), p_{k-1}, H_{k-1}\right )<br>
+$$</p>
+<ul>
+<li>$P(Q)$是教学计划</li>
+<li>$p_{k-1}\in \left{0,1\right }^N$，例如$[1,1,1,0,0]$​表示每个教学步骤是否完成
+<ul>
+<li>长度等于N</li>
+<li>此时表示推进到第四个教学步骤</li>
+</ul>
+</li>
+<li>$H_{k-1} = [(L_1,T_1,s_1), &hellip;]$
+<ul>
+<li>L和T表示老师与学生的对话</li>
+<li>推断的学生状态 $s_i$</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>当收到学生的新发言$L_k$​时</p>
+<p>首先做一次<strong>评估</strong></p>
+<p>$$<br>
+s_k = Assess(L_k,M_{k-1})<br>
+$$<br>
+得到学习者的状态</p>
+<p>然后根据当前状态，生成教师回复</p>
+<p>$$<br>
+T_k = Act(L_k,s_k,M_{k-1})<br>
+$$<br>
+根据$s_k$，$T_k$可能是不同的策略</p>
+<ul>
+<li>推进到下一步骤</li>
+<li>针对当前教学步骤给出进一步提示</li>
+</ul>
+<p>同时$s_k$的取值以及对应所有变量的操作如下</p>
+<p><img alt="sk" loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260717015511402.png"></p>
+<p>根据$s_k$修改对应的$p_k[t]$</p>
+<p>当$p_k$全部为1时结束</p>
+<h3 id="train">Train</h3>
+<ul>
+<li>原数据：BigMath 数据集</li>
+</ul>
+<p>使用上述框架生产了数据</p>
+<p>并且使用较强的模型对每一个环节进行校验，筛选合法数据</p>
+<p>Qwen2.5-7B-Instruct 进行微调，从而得到 ScaffoldLM-7B</p>
+<h3 id="exp-1">Exp</h3>
+<p><img loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260717023200724.png"></p>
+<ul>
+<li>前六个维度：使用baseline与豆包学生进行交互，外部LLM进行judge评分
+<ul>
+<li>答案准确性</li>
+<li>分步骤支架教学</li>
+<li>主题遵循</li>
+<li>问题质量</li>
+<li>指导质量</li>
+</ul>
+</li>
+<li>自适应反馈：由人工标注三类数据（回答正确、回答错误、提出问题）
+<ul>
+<li>给定对话历史，模型需要生成下一条教师回复</li>
+<li>LLM检查该回复是否在认知层面与人工标注的学习者状态相匹配</li>
+</ul>
+</li>
+</ul>
+<p>同时使用<strong>tutorRL</strong>的方式测试了</p>
+<ul>
+<li>学习者解题成功率的提升幅度</li>
+<li>直接泄露解法的对话占全部对话的比例</li>
+</ul>
+<blockquote>
+<p>“学生”是固定的 <strong>Llama-3.1-8B-Instruct</strong></p>
+<ul>
+<li>先让 Llama-3.1-8B-Instruct 独立解题</li>
+<li>等概率选择两种方式进行辅导
+<ul>
+<li>学生先提交一个尝试，然后 Tutor 针对该尝试辅导</li>
+<li>Tutor 先开始提问，主动引导学生进行解题</li>
+</ul>
+</li>
+<li>结合对话重新做一次题</li>
+</ul>
+</blockquote>
+<p><img loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260717024655108.png"></p>
+<h2 id="from-knowing-to-teaching-scaffolding-pedagogical-decisions-for-llm-agent">From Knowing to Teaching: Scaffolding Pedagogical Decisions for LLM Agent</h2>
+<p><a href="https://aclanthology.org/2026.acl-long.1328.pdf">2026.acl-long.1328.pdf</a></p>
+<p>ACL2026</p>
+<h3 id="intro-2">Intro</h3>
+<p>作者认为LLM的知识够多，欠缺的是<strong>知识组织和教学决策能力</strong></p>
+<blockquote>
+<p>不知道哪些知识适合当前学生；</p>
+<p>不知道应该先讲什么、后讲什么；</p>
+<p>不知道测验只能检测已经教过的目标；</p>
+<p>不知道教材、例题、模板和题库承担不同作用</p>
+</blockquote>
+<p>现有方法：</p>
+<ul>
+<li>对单份文档进行个性化处理</li>
+<li>根据主题直接生成课程</li>
+<li>&hellip;.</li>
+</ul>
+<p>这些方法都没有同时建模区分专业教学的三个关键决策：</p>
+<ul>
+<li>
+<p><strong>选择</strong>：识别材料的教学意图</p>
+<ul>
+<li>什么应该进入课程？材料应该怎样使用？</li>
+<li>不只是RAG</li>
+</ul>
+</li>
+<li>
+<p><strong>编排</strong>：建立逐步递进的认知过程</p>
+<ul>
+<li>内容应该按什么顺序出现？</li>
+</ul>
+</li>
+<li>
+<p><strong>综合</strong>：保证不同教学组件之间的一致性</p>
+<ul>
+<li>各个课程组件是否在教同一节课？</li>
+<li>形成一个有闭环的、连贯的教学系统</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>这里切入点主要是</p>
+<ul>
+<li>
+<p><strong>多文档摘要研究</strong>解决“怎样融合多个来源”；</p>
+</li>
+<li>
+<p><strong>教育内容生成研究</strong>分别解决幻灯片、题目或教案的生成。</p>
+</li>
+</ul>
+<p>作者希望解决：大多解决某一种教学产物的生成，但缺少一个以教学理论为依据、能理解多份材料用途，并保证课件、讲稿和测验相互一致的端到端系统</p>
+<h3 id="method-2">Method</h3>
+<h4 id="source">Source</h4>
+<p>三个模块为什么是对的</p>
+<blockquote>
+<p>我们对三名 K–12 教育工作者进行了半结构化访谈。他们分别教授中国文学、英语和生物，教学经验从 1 年到 18 年不等</p>
+</blockquote>
+<h4 id="formulation">Formulation</h4>
+<p>有教学文档集合$D = {d_1, d_2, &hellip;}$</p>
+<p>课程要求描述$R$</p>
+<p>目标是生成一节课$L = \left{ c_1, c_2 ,&hellip;\right}$</p>
+<p>其中$c_i$是一页ppt、一段讲稿、或者视觉画布、测验题</p>
+<hr>
+<p><img loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260717121203066.png"></p>
+<h4 id="explorer-selection">Explorer (Selection)</h4>
+<p>首先需要负责从源文件$D$中进行解析文档</p>
+<ul>
+<li>
+<p>解析 PDF</p>
+</li>
+<li>
+<p>转写音频</p>
+</li>
+<li>
+<p>从视频中抽取代表性画面</p>
+</li>
+<li>
+<p>&hellip;</p>
+</li>
+</ul>
+<p>Explorer 会使用一个包含<strong>六种类别</strong>的教学意图体系，对每个内容块进行<strong>分类</strong></p>
+<ul>
+<li><strong>内容（Content）</strong>：核心知识</li>
+<li><strong>先备知识（Prerequisite）</strong>：默认学习者已经掌握的背景知识</li>
+<li><strong>补充材料（Supplementary）</strong>：辅助解释的材料</li>
+<li><strong>应用（Application）</strong>：现实世界中的示例</li>
+<li><strong>评估（Assessment）</strong>：题目模式</li>
+<li><strong>风格（Style）</strong>：形式与呈现方式方面的指导</li>
+</ul>
+<blockquote>
+<p>教什么、学习者已经知道什么、如何解释、为什么重要、如何评估，以及如何呈现</p>
+</blockquote>
+<p>接下来进行<strong>筛选组织</strong></p>
+<p>使用一个ReAct架构的Agent</p>
+<ul>
+<li>
+<p>工具：语义搜索、数据块获取</p>
+</li>
+<li>
+<p>在特定<strong>意图</strong>对应的提取目标指导下，<strong>反复查询文档</strong></p>
+</li>
+<li>
+<p>分析当前需求→语义搜索→获取相关 chunk→检查是否足够→继续搜索或停止</p>
+<ul>
+<li>搜索 Content：核心定义、知识点……</li>
+<li>搜索 Assessment：常见题型、难度信息……</li>
+<li>&hellip;.</li>
+</ul>
+</li>
+</ul>
+<p>ReAct觉得内容收集足够，满足意图，最终得到一个chunk pool</p>
+<table>
+  <thead>
+      <tr>
+          <th>Chunk</th>
+          <th>内容</th>
+          <th>意图</th>
+          <th>来源</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>(c_1)</td>
+          <td>为什么计算机需要排序</td>
+          <td>Application</td>
+          <td>教材第1页</td>
+      </tr>
+      <tr>
+          <td>(c_2)</td>
+          <td>冒泡排序的定义</td>
+          <td>Content</td>
+          <td>教材第7章</td>
+      </tr>
+      <tr>
+          <td>(c_3)</td>
+          <td>冒泡排序交换动画</td>
+          <td>Supplementary</td>
+          <td>视频 02:10</td>
+      </tr>
+      <tr>
+          <td>(c_4)</td>
+          <td>对数组执行一轮冒泡排序</td>
+          <td>Assessment</td>
+          <td>试卷第3题</td>
+      </tr>
+      <tr>
+          <td>(c_5)</td>
+          <td>冒泡排序复杂度为 (O(n^2))</td>
+          <td>Content</td>
+          <td>教材第7章</td>
+      </tr>
+      <tr>
+          <td>(c_6)</td>
+          <td>比较冒泡排序和快速排序</td>
+          <td>Assessment</td>
+          <td>习题集第5题</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="planner">Planner</h4>
+<p>首先是提取<strong>学习目标</strong></p>
+<p>输入是上述的chunk pool</p>
+<p>输出：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">LO1：学生能够说明为什么需要排序
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">来源：c1
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">LO2：学生能够解释冒泡排序的工作原理
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">来源：c2、c3
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">LO3：学生能够对一个给定数组执行冒泡排序
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">来源：c2、c3、c4
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">
+</span></span><span class="line"><span class="ln">10</span><span class="cl">LO4：学生能够分析冒泡排序的时间复杂度
+</span></span><span class="line"><span class="ln">11</span><span class="cl">来源：c5
+</span></span><span class="line"><span class="ln">12</span><span class="cl">
+</span></span><span class="line"><span class="ln">13</span><span class="cl">LO5：学生能够比较冒泡排序和快速排序
+</span></span><span class="line"><span class="ln">14</span><span class="cl">来源：c5、c6
+</span></span></code></pre></div><blockquote>
+<p>每个学习目标都要和具体的源材料绑定，以保证生成内容忠实于原文，并支持教师追溯来源</p>
+</blockquote>
+<hr>
+<p>对学习目标进行分级</p>
+<p>输入：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">LO1：说明为什么需要排序
+</span></span><span class="line"><span class="ln">2</span><span class="cl">LO2：解释冒泡排序原理
+</span></span><span class="line"><span class="ln">3</span><span class="cl">LO3：执行冒泡排序
+</span></span><span class="line"><span class="ln">4</span><span class="cl">LO4：分析时间复杂度
+</span></span><span class="line"><span class="ln">5</span><span class="cl">LO5：比较两种排序算法
+</span></span></code></pre></div><p>输出：</p>
+<table>
+  <thead>
+      <tr>
+          <th>学习目标</th>
+          <th>Bloom 层级</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>LO1：说明为什么需要排序</td>
+          <td>Remember</td>
+      </tr>
+      <tr>
+          <td>LO2：解释冒泡排序原理</td>
+          <td>Understand</td>
+      </tr>
+      <tr>
+          <td>LO3：执行冒泡排序</td>
+          <td>Apply</td>
+      </tr>
+      <tr>
+          <td>LO4：分析时间复杂度</td>
+          <td>Analyze</td>
+      </tr>
+      <tr>
+          <td>LO5：判断哪种算法更合适</td>
+          <td>Evaluate</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p>布鲁姆认知目标分类法（Bloom et al., 1956）提供了一种有原则的排序方法，将认知活动划分为六个<strong>复杂度逐渐提高</strong>的层次</p>
+<ul>
+<li>记忆→理解→应用→分析→评价→创造</li>
+</ul>
+</blockquote>
+<p>按照认知难度<strong>排序</strong>后，进行设计组件级课程结构</p>
+<p><img loading="lazy" src="/posts/edu_agent_paper_review/assets/image-20260717123826589.png"></p>
+<p>例如：</p>
+<table>
+  <thead>
+      <tr>
+          <th>组件</th>
+          <th>类型</th>
+          <th>对应目标</th>
+          <th>Bloom 层级</th>
+          <th>内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>(s_1)</td>
+          <td>Slide</td>
+          <td>LO1</td>
+          <td>Remember</td>
+          <td>为什么需要排序</td>
+      </tr>
+      <tr>
+          <td>(s_2)</td>
+          <td>Slide</td>
+          <td>LO2</td>
+          <td>Understand</td>
+          <td>冒泡排序的比较与交换</td>
+      </tr>
+      <tr>
+          <td>(s_3)</td>
+          <td>Slide</td>
+          <td>LO3</td>
+          <td>Apply</td>
+          <td>对 <code>[5,2,4,1]</code> 执行第一轮</td>
+      </tr>
+      <tr>
+          <td>(q_1)</td>
+          <td>Quiz</td>
+          <td>LO3</td>
+          <td>Apply</td>
+          <td>预测下一次交换</td>
+      </tr>
+      <tr>
+          <td>(s_4)</td>
+          <td>Slide</td>
+          <td>LO4</td>
+          <td>Analyze</td>
+          <td>比较次数与 (O(n^2))</td>
+      </tr>
+      <tr>
+          <td>(s_5)</td>
+          <td>Slide</td>
+          <td>LO5</td>
+          <td>Evaluate</td>
+          <td>与快速排序比较</td>
+      </tr>
+      <tr>
+          <td>(q_2)</td>
+          <td>Quiz</td>
+          <td>LO5</td>
+          <td>Evaluate</td>
+          <td>为具体场景选择算法</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="genderator">Genderator</h4>
+<p>按既定的顺序完成生成</p>
+<p>所有记忆需要按结构落盘，作为必要的上下文</p>
+<p>上下文根据顺序是从左到右依次揭露的</p>
+<p>并且需要检验生成内容的LO等是否一致</p>
+<h3 id="exp-2">Exp</h3>
+<p>经典的LLM Judge + 人类评审</p>
+<p>附带人机一致性检验</p>
+]]></content:encoded></item></channel></rss>
