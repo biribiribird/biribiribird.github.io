@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>生产力 on BiribiriBird</title><link>https://biribiribird.top/categories/%E7%94%9F%E4%BA%A7%E5%8A%9B/</link><description>Recent content in 生产力 on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Fri, 24 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/categories/%E7%94%9F%E4%BA%A7%E5%8A%9B/index.xml" rel="self" type="application/rss+xml"/><item><title>杂谈 · 生产力 · 微信与Codex的连携技能</title><link>https://biribiribird.top/posts/tittle-tattle-wechatgpt/</link><pubDate>Fri, 24 Jul 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/tittle-tattle-wechatgpt/</guid><description>&lt;p&gt;核心贡献：解决了吃饭的时候没法编程的问题&lt;/p&gt;
+&lt;p&gt;以及摸鱼的时候不能干活的问题&lt;/p&gt;
+&lt;p&gt;以及在微信端可切换codex和claude code，感觉work&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/UNLINEARITY/CLI-WeChat-Bridge"&gt;Github Link&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="开始"&gt;开始&lt;/h1&gt;
+&lt;p&gt;要求&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://nodejs.org/en/download"&gt;Node.js&lt;/a&gt; &lt;code&gt;&amp;gt;= 24.0.0&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span class="line"&gt;&lt;span class="ln"&gt;1&lt;/span&gt;&lt;span class="cl"&gt;npm install -g cli-wechat-bridge@latest
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后登录一下，输入：&lt;code&gt;wechat-setup&lt;/code&gt;&lt;/p&gt;</description><content:encoded><![CDATA[<p>核心贡献：解决了吃饭的时候没法编程的问题</p>
+<p>以及摸鱼的时候不能干活的问题</p>
+<p>以及在微信端可切换codex和claude code，感觉work</p>
+<p><a href="https://github.com/UNLINEARITY/CLI-WeChat-Bridge">Github Link</a></p>
+<h1 id="开始">开始</h1>
+<p>要求</p>
+<ul>
+<li><a href="https://nodejs.org/en/download">Node.js</a> <code>&gt;= 24.0.0</code></li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl">npm install -g cli-wechat-bridge@latest
+</span></span></code></pre></div><p>然后登录一下，输入：<code>wechat-setup</code></p>
+<p>扫码完成登录</p>
+<hr>
+<p>然后我们尝试启动一下服务<code>wechat-codex-start</code>、<code>wechat-claude-start</code>、<code>wechat-opencode-start</code></p>
+<blockquote>
+<p>启动 bridge 后，建议先在微信里向 Bot 发送一条消息，例如 <code>hello</code></p>
+<p>这样 bridge 能拿到最新的微信会话 <code>context_token</code>，之后本地终端中的输入、最终回复和审批提示才能稳定同步回微信</p>
+</blockquote>
+<p>长期使用：</p>
+<p><img loading="lazy" src="/posts/tittle-tattle-wechatgpt/assets/image-20260724193017839.png"></p>
+]]></content:encoded></item><item><title>博客写作与发布流程（Hugo + Markdown）</title><link>https://biribiribird.top/posts/blog-writing-publishing-workflow/</link><pubDate>Tue, 23 Sep 2025 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/blog-writing-publishing-workflow/</guid><description>&lt;p&gt;这篇文章记录当前博客从写 Markdown 到网站上线的步骤。以下命令在 &lt;strong&gt;Windows PowerShell&lt;/strong&gt; 中执行，起点是博客根目录：&lt;code&gt;C:\Users\95443\OneDrive\Blog\biribiribird&lt;/code&gt;。&lt;/p&gt;</description><content:encoded><![CDATA[<p>这篇文章记录当前博客从写 Markdown 到网站上线的步骤。以下命令在 <strong>Windows PowerShell</strong> 中执行，起点是博客根目录：<code>C:\Users\95443\OneDrive\Blog\biribiribird</code>。</p>
+<h2 id="1-创建文章">1. 创建文章</h2>
+<p>在 <code>content/posts/</code> 下新建一个独立文件夹，里面放 <code>index.md</code>。例如这篇文章位于：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="ln">1</span><span class="cl">content/posts/tittle-tattle/work-env/blog-writing-publishing/
+</span></span><span class="line"><span class="ln">2</span><span class="cl">└── index.md
+</span></span></code></pre></div><p>从下面的模板开始写，发布前确认 <code>draft: false</code>，并给每篇文章使用不同的 <code>slug</code>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nn">---</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l">文章标题</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="nt">date</span><span class="p">:</span><span class="w"> </span><span class="ld">2026-09-23</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="nt">draft</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="nt">tags</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;标签&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="nt">categories</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;分类&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="nt">series</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;专栏&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="nt">slug</span><span class="p">:</span><span class="w"> </span><span class="l">my-post-slug</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="nn">---</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="l">正文从这里开始。</span><span class="w">
+</span></span></span></code></pre></div><p><code>slug</code> 决定文章地址，例如 <code>my-post-slug</code> 对应 <code>/posts/my-post-slug/</code>。暂时不想公开时，设为 <code>draft: true</code>；预览草稿时使用下面的 <code>-D</code> 参数。</p>
+<p>图片可以放在 <code>index.md</code> 旁边，例如 <code>assets/screenshot.png</code>，然后在正文中写：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="ln">1</span><span class="cl">![<span class="nt">图片说明</span>](<span class="na">assets/screenshot.png</span>)
+</span></span></code></pre></div><h2 id="2-编辑-markdown">2. 编辑 Markdown</h2>
+<p>标题用 <code>#</code>、<code>##</code>、<code>###</code>，链接写成 <code>[文字](https://example.com)</code>，代码块用三个反引号包住并标明语言。保存后通过本地预览检查效果。</p>
+<p>本站开启了单换行显示，因此同一段里直接按回车，网页上也会换行；如果想开始<strong>新段落</strong>，两段之间留一个空行。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="ln">1</span><span class="cl">第一行
+</span></span><span class="line"><span class="ln">2</span><span class="cl">第二行
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl">这是新的一段。
+</span></span></code></pre></div><p>公式会在 Hugo <strong>构建时</strong>生成 HTML。行内公式使用单个美元符号包围；行间公式使用双美元符号，并在公式前后留空行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="ln">1</span><span class="cl">这是行内公式：$E=mc^2$。
+</span></span><span class="line"><span class="ln">2</span><span class="cl">
+</span></span><span class="line"><span class="ln">3</span><span class="cl">$$
+</span></span><span class="line"><span class="ln">4</span><span class="cl">E=mc^2
+</span></span><span class="line"><span class="ln">5</span><span class="cl">$$
+</span></span><span class="line"><span class="ln">6</span><span class="cl">
+</span></span><span class="line"><span class="ln">7</span><span class="cl">这里继续写正文。
+</span></span></code></pre></div><p>行间公式内部需要多行排版时，按 LaTeX 语法使用 <code>aligned</code> 等环境与 <code>\\</code> 换行；不要依靠 Markdown 的普通回车来拆分公式。</p>
+<h2 id="3-本地预览">3. 本地预览</h2>
+<p>在博客根目录打开 PowerShell，运行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="ln">1</span><span class="cl"><span class="p">.\</span><span class="n">hugo</span><span class="p">.</span><span class="py">exe</span> <span class="n">server</span> <span class="n">-D</span>
+</span></span></code></pre></div><p>浏览器打开 <code>http://localhost:1313/</code>，查看文章列表和文章页。检查标题、图片、链接、代码块、公式，以及手机宽度下的排版。编辑并保存 <code>index.md</code> 后，Hugo 会自动更新预览；结束时按 <code>Ctrl+C</code>。</p>
+<p><code>-D</code> 会让草稿也出现在本地预览中。准备发布时检查 <code>draft: false</code>，否则正常构建不会输出该文章。</p>
+<h2 id="4-构建并检查发布文件">4. 构建并检查发布文件</h2>
+<p>仍在博客根目录执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="ln">1</span><span class="cl"><span class="p">.\</span><span class="n">hugo</span><span class="p">.</span><span class="py">exe</span> <span class="p">-</span><span class="n">-minify</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="n">git</span> <span class="n">-C</span> <span class="n">public</span> <span class="n">status</span> <span class="p">-</span><span class="n">-short</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">git</span> <span class="n">-C</span> <span class="n">public</span> <span class="nb">diff </span><span class="p">-</span><span class="n">-stat</span>
+</span></span></code></pre></div><p>Hugo 会把网站生成到 <code>public/</code>；这个目录是<strong>发布产物</strong>，不用于手工写文章。先确认构建没有错误，再查看 <code>public</code> 的变更，尤其是本次文章的 <code>posts/my-post-slug/index.html</code>、图片和站点索引。若 <code>public</code> 里本来就有其他未提交改动，先分清它们的来源再提交。</p>
+<h2 id="5-发布网站">5. 发布网站</h2>
+<p>确认 <code>public</code> 中的变更都要发布后，在博客根目录执行：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">git</span> <span class="n">-C</span> <span class="n">public</span> <span class="n">add</span> <span class="n">-A</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="n">git</span> <span class="n">-C</span> <span class="n">public</span> <span class="n">commit</span> <span class="n">-m</span> <span class="s2">&#34;Publish blog post&#34;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">git</span> <span class="n">-C</span> <span class="n">public</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">main</span>
+</span></span></code></pre></div><p>这里的 <code>public/</code> 本身是一个 Git 仓库，远程仓库是 <code>biribiribird/biribiribird.github.io</code>。推送完成后，访问 <code>https://biribiribird.top/posts/my-post-slug/</code> 核对线上页面；把示例 slug 换成文章自己的 slug。</p>
+<p>仓库中也有 <code>upload.bat</code>，但它使用 <code>git push --force</code>。日常发布按上面的命令检查后普通推送更稳妥，尤其不要在未看清 <code>public</code> 变更时直接运行脚本。</p>
+<h2 id="每次发布前快速核对">每次发布前快速核对</h2>
+<ul>
+<li><code>index.md</code> 位于 <code>content/posts/</code> 下，<code>date</code>、<code>slug</code> 和 <code>draft</code> 正确。</li>
+<li>本地预览中的图片、链接、公式和换行正常。</li>
+<li><code>hugo.exe --minify</code> 构建成功，<code>public</code> 的变更已核对。</li>
+<li>推送后打开线上文章地址，再检查一次页面。</li>
+</ul>
+]]></content:encoded></item></channel></rss>
