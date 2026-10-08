@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Zero2full on BiribiriBird</title><link>https://biribiribird.top/series/zero2full/</link><description>Recent content in Zero2full on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 01 Oct 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/series/zero2full/index.xml" rel="self" type="application/rss+xml"/><item><title>全栈开发高手 · （一）· 系统与网络</title><link>https://biribiribird.top/posts/zero2full_stack_system_and_network/</link><pubDate>Thu, 01 Oct 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/zero2full_stack_system_and_network/</guid><description>&lt;h2 id="internet"&gt;Internet&lt;/h2&gt;
+&lt;p&gt;域名解决了IP地址不好记的问题&lt;br&gt;
+那么如何通过域名转化到IP地址呢？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Domain Name System（DNS）
+&lt;ul&gt;
+&lt;li&gt;将域名和IP地址相互映射的一个分布式数据库（通讯录）&lt;/li&gt;
+&lt;li&gt;一个域名可以对应多个IP，DNS可以轮流返回不同的IP，负载均衡&lt;/li&gt;
+&lt;li&gt;层级结构
+&lt;ul&gt;
+&lt;li&gt;根域名服务器：知道全球所有顶级域名的位置&lt;/li&gt;
+&lt;li&gt;顶级域名服务器：管理&lt;code&gt;.com&lt;/code&gt; 、&lt;code&gt;.cn&lt;/code&gt; 、&lt;code&gt;.org&lt;/code&gt; 等顶级域名&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;一次完整的DNS解析&lt;/p&gt;</description><content:encoded><![CDATA[<h2 id="internet">Internet</h2>
+<p>域名解决了IP地址不好记的问题<br>
+那么如何通过域名转化到IP地址呢？</p>
+<ul>
+<li>Domain Name System（DNS）
+<ul>
+<li>将域名和IP地址相互映射的一个分布式数据库（通讯录）</li>
+<li>一个域名可以对应多个IP，DNS可以轮流返回不同的IP，负载均衡</li>
+<li>层级结构
+<ul>
+<li>根域名服务器：知道全球所有顶级域名的位置</li>
+<li>顶级域名服务器：管理<code>.com</code> 、<code>.cn</code> 、<code>.org</code> 等顶级域名</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>一次完整的DNS解析</p>
+<ul>
+<li>检查本地DNS缓存</li>
+<li>向本地DNS服务器请求</li>
+<li>本地DNS服务器
+<ul>
+<li>本地DNS 询问 根服务器：返回<code>.com</code></li>
+<li>本地DNS 询问 <code>.com</code> 服务器：返回<code>example.com</code></li>
+<li>本地DNS 询问<code>example.com</code> ：得到IP地址</li>
+</ul>
+</li>
+<li>缓存到本地</li>
+</ul>
+<p>IP地址标记了一台服务器的位置<br>
+但是服务器可能有非常多服务，通过端口部署，开放多个</p>
+<ul>
+<li>HTTP：默认80端口</li>
+<li>HTTPS：默认443</li>
+</ul>
+]]></content:encoded></item></channel></rss>
