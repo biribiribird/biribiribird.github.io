@@ -50,5 +50,17 @@
 <ul>
 <li>HTTP：默认80端口</li>
 <li>HTTPS：默认443</li>
+<li>SSH：22</li>
 </ul>
+<h2 id="nginx">Nginx</h2>
+<p>linux下的目录是有约定俗成的习惯</p>
+<ul>
+<li><code>/usr/bin</code>：用户的可执行程序(binary)</li>
+<li><code>/etc</code>：软件配置文件</li>
+<li><code>/var/www/</code>：网站文件</li>
+<li><code>/var/log</code>：日志文件</li>
+</ul>
+<blockquote>
+<p><code>/var</code> 是 <strong>Variable</strong>（可变的）的缩写。它专门用来存放系统运行过程中<strong>经常变化</strong>的数据</p>
+</blockquote>
 ]]></content:encoded></item></channel></rss>

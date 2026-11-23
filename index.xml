@@ -1,4 +1,1173 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>BiribiriBird</title><link>https://biribiribird.top/</link><description>Recent content on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Thu, 08 Oct 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/index.xml" rel="self" type="application/rss+xml"/><item><title>论文阅读高手 · 教育论文笔记（二）· Benchmark</title><link>https://biribiribird.top/posts/edu_agent_paper_review_benchmark/</link><pubDate>Thu, 08 Oct 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/edu_agent_paper_review_benchmark/</guid><description>&lt;p&gt;[TOC]&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>BiribiriBird</title><link>https://biribiribird.top/</link><description>Recent content on BiribiriBird</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Tue, 03 Nov 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://biribiribird.top/index.xml" rel="self" type="application/rss+xml"/><item><title>论文阅读高手 · 教育论文笔记（五）· 学生模拟 · 方案</title><link>https://biribiribird.top/posts/edu_agent_simulated_student_review_method/</link><pubDate>Tue, 03 Nov 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/edu_agent_simulated_student_review_method/</guid><description>&lt;p&gt;[TOC]&lt;/p&gt;
+&lt;h2 id="irt"&gt;IRT&lt;/h2&gt;
+&lt;p&gt;感觉得好好了解一下这个东西怎么做了，出现的次数非常多&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;判断一道题难度的方法是：准确率&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;但是这显然是高度与做题群体敏感的，如果群体是大学生、小学生，那么衡量难度就是完全不一样的&lt;/p&gt;</description><content:encoded><![CDATA[<p>[TOC]</p>
+<h2 id="irt">IRT</h2>
+<p>感觉得好好了解一下这个东西怎么做了，出现的次数非常多</p>
+<p><strong>判断一道题难度的方法是：准确率</strong></p>
+<p>但是这显然是高度与做题群体敏感的，如果群体是大学生、小学生，那么衡量难度就是完全不一样的</p>
+<p>因此IRT考虑两个因素：</p>
+<ul>
+<li>学生能力</li>
+<li>题目难度</li>
+</ul>
+<p>比较简单的模型，设定学生能力是<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span></span></span></span>，题目难度值是<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi></mrow><annotation encoding="application/x-tex">b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span><br>
+因此：</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>−</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">\theta - b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span>越大，说明学生能力大于题目难度，做对的概率越高</li>
+</ul>
+<p>一种常用的概率计算公式：<br>
+</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mo stretchy="false">(</mo><mi>θ</mi><mo>−</mo><mi>b</mi><mo stretchy="false">)</mo></mrow></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+P = \frac{1}{1+e^{-(\theta-b)}}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.1088em;vertical-align:-0.7873em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.296em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.814em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span><span class="mbin mtight">−</span><span class="mord mathnormal mtight">b</span><span class="mclose mtight">)</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7873em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><p><br>
+这样当学生能力与题目难度相同时，做对的概率为50%</p>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261103204756340.png"></p>
+<br>
+<p>IRT从数据中进行学习</p>
+<table>
+  <thead>
+      <tr>
+          <th>学生</th>
+          <th>题目 A</th>
+          <th>题目 B</th>
+          <th>题目 C</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>小明</td>
+          <td>对</td>
+          <td>对</td>
+          <td>对</td>
+      </tr>
+      <tr>
+          <td>小红</td>
+          <td>对</td>
+          <td>对</td>
+          <td>错</td>
+      </tr>
+      <tr>
+          <td>小李</td>
+          <td>对</td>
+          <td>错</td>
+          <td>错</td>
+      </tr>
+      <tr>
+          <td>小王</td>
+          <td>错</td>
+          <td>错</td>
+          <td>错</td>
+      </tr>
+  </tbody>
+</table>
+<p>显然对于这组数据：</p>
+<ul>
+<li>小明 &gt; 小红 &gt; 小李 &gt; 小王</li>
+<li>A &lt; B &lt; C</li>
+</ul>
+<p>我们用这些数据去学习每个学生的参数<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>θ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\theta_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，和每道题目<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">b_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></p>
+<br>
+<p>学生模拟估计试题难度的假设是：</p>
+<ul>
+<li>通过学生模拟生成作答，并且完成外部评分</li>
+<li>使用IRT模型进行拟合</li>
+<li>从而得到每个题目的难度参数</li>
+</ul>
+<br>
+<h2 id="smart-simulated-students-aligned-with-item-response-theory-for-question-difficulty-prediction">SMART: Simulated Students Aligned with Item Response Theory for Question Difficulty Prediction</h2>
+<p><a href="https://arxiv.org/abs/2507.05129">EMNLP 2025 - 2507.05129 SMART: Simulated Students Aligned with Item Response Theory for Question Difficulty Prediction</a></p>
+<h3 id="intro">Intro</h3>
+<ul>
+<li>需求：估计题目难度
+<ul>
+<li>传统方法：例如IRT，每个环节都依赖学生真实作答</li>
+</ul>
+</li>
+<li>已有方法
+<ul>
+<li>根据题目内容，预测输入题目文本，直接预测难度</li>
+<li>利用模拟学生，生成模拟作答，再<strong>根据作答结果估计难度</strong>
+<ul>
+<li><strong>根据作答结果估计难度</strong>的逻辑同IRT</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>开放类型试题：简答题、编程题等……
+<ul>
+<li>困难：回答生成的表达差异、回答的评分复杂</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Q1：学生回答内容、表达方式多样</p>
+<p>Q2：开放式回答评分复杂如何解决</p>
+<p>Q3：如何解决生成表现不符合指定能力</p>
+</blockquote>
+<p>形式化的，对于每道题<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>：</p>
+<ul>
+<li>题目文本<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">q_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>以及必要的附件<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">m_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></li>
+<li>评分标准<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></li>
+</ul>
+<p>对于学生<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05724em;">j</span></span></span></span>：</p>
+<ul>
+<li>作答<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{i,j}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></li>
+<li>得分<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{i,j}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></li>
+</ul>
+<h3 id="method">Method</h3>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261104200015155.png"></p>
+<ul>
+<li>利用真实数据及其人工评分，学习一个LLM学生模拟器<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span></li>
+<li>模拟器<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span>针对<strong>未见过的题目</strong>进行作答</li>
+<li>评分模型<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span>进行打分</li>
+<li>根据完成评分的题目、学生拟合新的IRT模型，从而得到题目难度</li>
+</ul>
+<h4 id="学生模拟器的训练">学生模拟器的训练</h4>
+<ul>
+<li>SFT
+<ul>
+<li>输入：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mi>i</mi></msub><mo separator="true">,</mo><msub><mi>m</mi><mi>i</mi></msub><mo separator="true">,</mo><msub><mi>θ</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">q_i,m_i,\theta_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">q</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>，组成提示词</li>
+<li>输出学生真实回答<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{i,j}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>​</li>
+</ul>
+</li>
+</ul>
+<p>这里的<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>θ</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\theta_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>是利用真实已有数据先拟合的</p>
+<blockquote>
+<p>我们将<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>θ</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\theta_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>四舍五入至小数点后四位，再转换为字符串。我们发现，这种做法优于将能力数值划分为带有文字描述的区间</p>
+</blockquote>
+<br>
+<p>但只是SFT的效果一般，模拟不同水平的学生效果一般</p>
+<p>作者认为只通过SFT，没法很好学会<strong>从低能力和高能力学生的区别</strong></p>
+<p>因为只靠<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span></span></span></span>的数值去区分学生，SFT让模型偏好去靠题目和前文预测出回答中的许多词，从而降低损失，而通过<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span></span></span></span>去改变不同的分布，SFT应该做的不是很好</p>
+<ul>
+<li>DPO：在给定学生能力和试题难度的条件下，优先选择得分具有<strong>更高 IRT 似然</strong>的回答</li>
+</ul>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261104202146591.png"></p>
+<p>偏好对的构建：</p>
+<ul>
+<li>对于每个真实学生回答<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{i,j}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>，我们找到同一道题<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>的其他学生回答<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{i,k}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></li>
+<li>并且要求<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><msub><mi>y</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>j</mi></mrow></msub><mi mathvariant="normal">∣</mi><msub><mi>θ</mi><mi>j</mi></msub><mo stretchy="false">)</mo><mo>−</mo><mi>P</mi><mo stretchy="false">(</mo><msub><mi>y</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>k</mi></mrow></msub><mi mathvariant="normal">∣</mi><msub><mi>θ</mi><mi>j</mi></msub><mo stretchy="false">)</mo><mo>&gt;</mo><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">P(y_{i,j}|\theta_j) - P(y_{i,k}|\theta_j) &gt; \epsilon</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">ϵ</span></span></span></span></li>
+</ul>
+<blockquote>
+<p>就是这个学生回答<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">r_{i,k}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>且取得对应分数的概率，明显低于原回答</p>
+</blockquote>
+<p>随机选取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span>个负例候选用于训练，构建 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span>个偏好对</p>
+<blockquote>
+<p>相当于这部分数据更加注重了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span></span></span></span>不同，所造成的回答质量的不同的这一区别</p>
+</blockquote>
+<h4 id="评分">评分</h4>
+<p>直接对真实数据进行SFT，输出一个分数</p>
+<h3 id="result">Result</h3>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261104204016805.png"></p>
+<hr>
+<p>题目量少的时候（假设30题），学生模拟路线有一个好处：</p>
+<ul>
+<li>直接预测题目难度，最多30条数据</li>
+<li>学生模拟，可以30倍的题目</li>
+</ul>
+<blockquote>
+<p><strong>当训练题目少、但每道题有较多真实学生回答时，学生模拟能利用这些回答提供额外监督；在本文实验中，这条路线优于直接预测难度。</strong></p>
+</blockquote>
+<br>
+<h2 id="act-like-a-5th-grader-is-not-enough-bounding-knowledge-in-llm-based-user-simulators">&ldquo;Act Like a 5th Grader&rdquo; is Not Enough: Bounding Knowledge in LLM-Based User Simulators</h2>
+<p><a href="https://arxiv.org/html/v1">“Act Like a 5th Grader” is Not Enough: Bounding Knowledge in LLM-Based User Simulators - 2608.30033 - EMNLP2026 Findings</a></p>
+<h3 id="intro-1">Intro</h3>
+<ul>
+<li>LLM无法遵循人物设定
+<ul>
+<li>拥有近乎全知的广泛知识</li>
+<li>远超角色的推理能力</li>
+</ul>
+</li>
+</ul>
+<p>论文认为：当前基于大语言模型的用户模拟器主要依赖表层提示，<strong>缺乏对人类底层认知过程的显式建模</strong></p>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261029232908113.png"></p>
+<blockquote>
+<p>能力更强的模型，成绩反而更加集中。这支持了作者的判断——提升模型能力本身，并不保证提升模拟的真实性。</p>
+</blockquote>
+<p>已有研究已经能用大模型模拟学生，包括根据学生的历史记录和能力画像生成回答、模拟课堂行为，以及复现特定错误</p>
+<p>但这些方法往往<strong>需要额外的学生信息</strong>，关注的也多是个体行为、题目评估或某类错误</p>
+<p>本篇论文的区别：</p>
+<ul>
+<li>输入只基于阅读材料和任务进行模拟</li>
+<li>目标对学生群体分布进行模拟，而非单个</li>
+<li>用工作记忆约束</li>
+</ul>
+<h3 id="exp">Exp</h3>
+<h4 id="pre-exp--prompt方法">Pre-Exp · Prompt方法</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">You are simulating a 5th-grade student in Norway taking a
+</span></span><span class="line"><span class="ln">2</span><span class="cl">reading comprehension test. Read the following text and
+</span></span><span class="line"><span class="ln">3</span><span class="cl">answer the question as a typical 10-11 year old student would.
+</span></span><span class="line"><span class="ln">4</span><span class="cl">The student may not always answer correctly.
+</span></span><span class="line"><span class="ln">5</span><span class="cl">&lt;TEXT&gt; {text_content} &lt;/TEXT&gt;
+</span></span><span class="line"><span class="ln">6</span><span class="cl">&lt;QUESTION&gt; {question_text} &lt;/QUESTION&gt;
+</span></span></code></pre></div><p>同时使用</p>
+<ul>
+<li><strong>平均准确率</strong>：答对题目的平均比例</li>
+<li><strong>JSD（Jensen–Shannon 散度）</strong>：比较模拟群体与真实评估群体的个人得分分布</li>
+</ul>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261029234849649.png"></p>
+<p>显然差异极大</p>
+<p>Random Guessing的JSD差异甚至更小</p>
+<p>模型越强 做题能力越强 但反而更远离了人类</p>
+<h4 id="a-cognitively-bounded-user-simulator">A Cognitively Bounded User Simulator</h4>
+<blockquote>
+<p>教育理论基础：儿童的阅读理解受<strong>工作记忆容量限制</strong>，无法同时记住并整合全文信息。</p>
+<ul>
+<li><strong>Baddeley 的工作记忆模型</strong>：情景缓冲器暂存、整合信息，中央执行系统利用这些信息推理。</li>
+<li><strong>Cowan 解释容量</strong>：能同时保留的信息很有限；儿童的容量还在发展，因此更容易出现信息不够用的情况。</li>
+</ul>
+</blockquote>
+<ul>
+<li>
+<p>一个参数化的容量上限<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span></span></span></span>：定义了保存在工作记忆中的不同文本命题的最大数量</p>
+</li>
+<li>
+<p>策略</p>
+<ul>
+<li>单遍阅读：模拟器仅接收原文，并提取全文中最显著的<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span></span></span></span>​ 个命题
+<ul>
+<li>模拟学生只读一遍文章，随后尝试依靠这一份固定的记忆痕迹，回答所有后续问题的情形</li>
+</ul>
+</li>
+<li>定向扫描： 模拟器同时接收<strong>原文</strong>和<strong>一道具体的阅读理解题</strong>，并提取最多<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span></span></span></span>个它认为与该题最相关的不同命题</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261030005419259.png"></p>
+<ul>
+<li>Step1：执行策略，提取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span></span></span></span>个命题</li>
+<li>Step2：执行，将原始文本全部移除，要求执行模块使用命题回答</li>
+</ul>
+<blockquote>
+<p>结构上分离信息提取与推理，严格约束了模拟器的全局注意机制</p>
+</blockquote>
+<p>这里限制在英文阅读题上</p>
+<p>试图通过不完整的信息进行推理，但这里似乎并没有办法去限制推理能力</p>
+<hr>
+<p>指标分为两类：</p>
+<ul>
+<li>
+<p>学生为中心：评估有多像学生</p>
+<ul>
+<li>平均准确率</li>
+<li>JSD</li>
+<li>期望校准误差：评估不同离散难度区间内答对率的一致性</li>
+</ul>
+</li>
+<li>
+<p>题目为中心：评估模拟对题目难度的一致性</p>
+<ul>
+<li>Spearman</li>
+<li>Pearson</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261030012316161.png"></p>
+<ul>
+<li>显式建模认知边界能够有效缓解大语言模型的“超人偏差”</li>
+<li>SPR 在所有<strong>以学生为中心的指标</strong>上都大幅优于 TS</li>
+<li>TS 在<strong>以题目为中心的一致性</strong>方面表现最强</li>
+</ul>
+<blockquote>
+<p>题外话：</p>
+<ul>
+<li>成绩分布：一个人答对多少</li>
+<li>难度相关性：一道题多少人答对</li>
+</ul>
+<p>因此这里通过一个框架，没有多少变数的情况下，无法做出丰富的学生模拟</p>
+<p>因此没法模仿群体学生？</p>
+<p><strong>说到底，它就是一个降低能力的旋钮，只是用工作记忆理论包装了一下。</strong></p>
+</blockquote>
+<h2 id="-parameterized-control-for-fine-grained-student-proficiency-simulation"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><msup><mi>S</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">PS^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span>: Parameterized Control for Fine-Grained Student Proficiency Simulation</h2>
+<p><a href="https://dl.acm.org/doi/epdf/10.1145/3799682.3841012">CIKM 2026 - 2602.00850 PS²: Parameterized Control for Fine-Grained Student Proficiency Simulation</a></p>
+<h3 id="intro-2">Intro</h3>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261111212137107.png"></p>
+<ul>
+<li>传统方法
+<ul>
+<li>依赖监督数据</li>
+<li>无监督依赖提示词控制学生模拟的层次
+<ul>
+<li>文本提示词难以控制细粒度的能力差异，不同水平作答重叠，甚至低水平高于高水平</li>
+<li>文本变化难以保证模拟的一致性与可靠性</li>
+<li>学生能力往往通过分数衡量，而提示词方法无法可靠对应</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>作者认为：有效的能力模拟需要<strong>对认知能力的差异</strong>进行建模</p>
+<ul>
+<li>
+<p>策略：参数化机制控制</p>
+<ul>
+<li>作者希望将成熟的大语言模型作为能力上界，加入参数化控制的噪声，降低能力</li>
+</ul>
+</li>
+<li>
+<p>需要关注的问题</p>
+<ul>
+<li>Q1：性能下降缺乏方向
+<ul>
+<li>降低的能力不可靠，最后输出的错误不一定是合理错误</li>
+</ul>
+</li>
+<li>Q2：衡量扰动幅度
+<ul>
+<li>如何确定要施加多少噪声，降低多少能力？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="method-1">Method</h3>
+<h4 id="base-model">Base Model</h4>
+<p>首先训练一个下界大语言模型，作为低能力学生的基准</p>
+<ul>
+<li>待训练的模型：Llama3.2-1B-Instruct</li>
+<li>生成模型：GPT-4o
+<ul>
+<li>根据题目、错误类型和风格示例，生成错误解答</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>错误类型：</p>
+<ul>
+<li>概念错误</li>
+<li>程序性错误</li>
+</ul>
+</blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln">1</span><span class="cl">错误分析：(程序性错误)
+</span></span><span class="line"><span class="ln">2</span><span class="cl">学生知道面积等于长乘以宽，但在乘法计算中出现错误。
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl">错误解答：
+</span></span><span class="line"><span class="ln">5</span><span class="cl">长方形面积等于长乘以宽。
+</span></span><span class="line"><span class="ln">6</span><span class="cl">6 × 4 = 28。
+</span></span><span class="line"><span class="ln">7</span><span class="cl">
+</span></span><span class="line"><span class="ln">8</span><span class="cl">最终答案：
+</span></span><span class="line"><span class="ln">9</span><span class="cl">28平方厘米。
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-plain" data-lang="plain"><span class="line"><span class="ln">1</span><span class="cl">错误分析：(概念错误)
+</span></span><span class="line"><span class="ln">2</span><span class="cl">学生可能混淆面积与周长，使用周长公式计算面积。
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl">错误解答：
+</span></span><span class="line"><span class="ln">5</span><span class="cl">长方形面积等于长与宽之和的两倍。
+</span></span><span class="line"><span class="ln">6</span><span class="cl">(6 + 4) × 2 = 20。
+</span></span><span class="line"><span class="ln">7</span><span class="cl">
+</span></span><span class="line"><span class="ln">8</span><span class="cl">最终答案：
+</span></span><span class="line"><span class="ln">9</span><span class="cl">20平方厘米。
+</span></span></code></pre></div><p>流程：</p>
+<ol>
+<li>LLama生成初始回答
+<ul>
+<li>输入：题目文本</li>
+<li>输出：LLama作答</li>
+</ul>
+</li>
+<li>GPT-4o构造错误数据
+<ul>
+<li>输入：LLama作答、题目文本、指定错误类型</li>
+<li>输出：gpt-4o的输出（实际操作中是两个输出，两个错误类型都输入一遍）</li>
+</ul>
+</li>
+<li>重复1、2，构造数据集</li>
+<li>Lora SFT</li>
+</ol>
+<h4 id="插值">插值</h4>
+<blockquote>
+<p><strong>让“高水平模型”和“低水平模型”分别提出预测，再按比例合成一个预测</strong></p>
+</blockquote>
+<p>高水平模型（Llama3.2-3B-Instruct 或 Llama3.2-8B-Instruct ）和低水平模型对于同一上下文，输出的logits分别为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>z</mi><mi>u</mi></msup><mo separator="true">,</mo><msup><mi>z</mi><mi>l</mi></msup></mrow><annotation encoding="application/x-tex">z^u,z^l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0435em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">u</span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span></span></span></span></span></span></span></p>
+<p>定义参数<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span>进行调控<br>
+</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>z</mi><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><msup><mi>z</mi><mi>l</mi></msup><mo>+</mo><mi>p</mi><msup><mi>z</mi><mi>u</mi></msup></mrow><annotation encoding="application/x-tex">
+z = (1-p)z^l + pz^u
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1491em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mclose">)</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9088em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7144em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">u</span></span></span></span></span></span></span></span></span></span></span></span><p><br>
+混合 logits 后，通过 softmax 得到下一token的概率，进行输出</p>
+<p><strong>两个模型始终读取同一份已生成前缀</strong></p>
+<h4 id="能力较准">能力较准</h4>
+<p>模拟40分、60分、80分的学生分别要用多大的p值</p>
+<ul>
+<li>有成绩单，使用不同p做同样的题，按照实际学生作答情况去校准</li>
+<li>无成绩单，直接0、0.25、0.5……</li>
+</ul>
+<blockquote>
+<p>这里非常粗糙啊</p>
+</blockquote>
+<h3 id="exp-1">Exp</h3>
+<p>数据集</p>
+<ul>
+<li><strong>EEDI</strong>：学生对数学选择题的作答
+<ul>
+<li><strong>同时测试“有目标成绩”和“无目标成绩”</strong></li>
+</ul>
+</li>
+<li><strong>SciEntsBank</strong>：15个领域中197道科学问题的11,000条简答题回答
+<ul>
+<li>未见领域（Unseen Domain，UD）</li>
+<li>未见问题（Unseen Questions，UQ）</li>
+<li><strong>未提供成绩标注，只测试“无目标成绩”</strong></li>
+</ul>
+</li>
+</ul>
+<h4 id="rq1">RQ1</h4>
+<blockquote>
+<p>模拟学生是否可以进行难度估计</p>
+</blockquote>
+<ol>
+<li>能力较准，对不同程度的学生先设定好p值</li>
+<li>根据p值对待测题目进行推理</li>
+<li>评测
+<ul>
+<li>选择题：直接验证正确性</li>
+<li>SciEntsBank：原论文提供了训练验证模型的方法，进行打分</li>
+</ul>
+</li>
+</ol>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261117004429487.png"></p>
+<h4 id="rq2">RQ2</h4>
+<blockquote>
+<p>模型生成回答是否像学生</p>
+</blockquote>
+<p>只采用SciEntsBank题目</p>
+<ol>
+<li>生成回答</li>
+<li>句子编码器 <code>multi-qa-mpnet-base-dot-v1</code>，把模拟回答和真实GT转化为向量</li>
+<li>计算指标
+<ul>
+<li>MAUVE：两组回答的<strong>分布匹配程度</strong></li>
+<li>FID：两组回答在分布统计特征上的<strong>距离</strong></li>
+<li>Div. KL：两组回答的<strong>多样性分布差异</strong></li>
+</ul>
+</li>
+</ol>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261117191108268.png"></p>
+<ul>
+<li>回答的整体语义分布更接近真实学生</li>
+<li>回答的多样性也更接近真实学生</li>
+</ul>
+<blockquote>
+<p>指标比较的是<strong>回答集合的分布</strong></p>
+<p>SciEntsBank 没有学生标识，因此它不能直接证明模型复现了某个具体学生持续、稳定的个人行为</p>
+</blockquote>
+<h4 id="rq3">RQ3</h4>
+<blockquote>
+<p><strong>学生水平能否被稳定控制</strong></p>
+<p><strong>水平划分变细后，设置为高水平的学生，是否仍比低水平学生表现更好？</strong></p>
+</blockquote>
+<p>输入：</p>
+<ul>
+<li>EDDI题目</li>
+<li>三种水平设置
+<ul>
+<li>分成3级，让各水平模拟学生做题，统计每个水平的平均正确率</li>
+<li>分成5级，让各水平模拟学生做题，统计每个水平的平均正确率</li>
+<li>分成7级，让各水平模拟学生做题，统计每个水平的平均正确率</li>
+</ul>
+</li>
+</ul>
+<p>检查：</p>
+<ul>
+<li>随着设定水平提高，平均正确率是否也提高（单调性）</li>
+<li>增加水平数量后，各水平是否仍然能够区分</li>
+</ul>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261117191625258.png"></p>
+<blockquote>
+<p>横轴：设定的学生水平</p>
+</blockquote>
+<h4 id="rq4">RQ4</h4>
+<blockquote>
+<p>消融</p>
+</blockquote>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_method/assets/image-20261117193539558.png"></p>
+<table>
+  <thead>
+      <tr>
+          <th>变体</th>
+          <th>改动</th>
+          <th>想检验的问题</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Add Noise</td>
+          <td>不使用下界模型，直接扰动上界模型</td>
+          <td>简单加噪声能否替代认知错误建模？</td>
+      </tr>
+      <tr>
+          <td>w/o Conceptual</td>
+          <td>移除概念错误数据</td>
+          <td>概念错误是否有作用？</td>
+      </tr>
+      <tr>
+          <td>w/o Procedural</td>
+          <td>移除程序性错误数据</td>
+          <td>程序性错误是否有作用？</td>
+      </tr>
+      <tr>
+          <td>w/o LB</td>
+          <td>不进行下界模型训练</td>
+          <td>专门训练下界模型是否有作用？</td>
+      </tr>
+  </tbody>
+</table>
+]]></content:encoded></item><item><title>论文阅读高手 · 教育论文笔记（四）· 学生模拟 · 问题的出发</title><link>https://biribiribird.top/posts/edu_agent_simulated_student_review_problem/</link><pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/edu_agent_simulated_student_review_problem/</guid><description>&lt;p&gt;[TOC]&lt;/p&gt;
+&lt;h2 id="can-llms-estimate-student-struggles-human-ai-difficulty-alignment-with-proficiency-simulation-for-item-difficulty-prediction"&gt;Can LLMs Estimate Student Struggles? Human-AI Difficulty Alignment with Proficiency Simulation for Item Difficulty Prediction&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://arxiv.org/pdf/2512.18880"&gt;Can LLMs Estimate Student Struggles? Human-AI Difficulty Alignment with Proficiency Simulation for Item Difficulty Prediction - ACL2026 - 2512.18880&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="intro"&gt;Intro&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;试题难度分析：课程设计、自动组卷、自适应测试等应用的基础&lt;/li&gt;
+&lt;li&gt;传统方法：冷启动问题，必须让大量真实学生作答&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;需要一种能在缺少学生作答数据时预测难度的方法&lt;/p&gt;</description><content:encoded><![CDATA[<p>[TOC]</p>
+<h2 id="can-llms-estimate-student-struggles-human-ai-difficulty-alignment-with-proficiency-simulation-for-item-difficulty-prediction">Can LLMs Estimate Student Struggles? Human-AI Difficulty Alignment with Proficiency Simulation for Item Difficulty Prediction</h2>
+<p><a href="https://arxiv.org/pdf/2512.18880">Can LLMs Estimate Student Struggles? Human-AI Difficulty Alignment with Proficiency Simulation for Item Difficulty Prediction - ACL2026 - 2512.18880</a></p>
+<h3 id="intro">Intro</h3>
+<ul>
+<li>试题难度分析：课程设计、自动组卷、自适应测试等应用的基础</li>
+<li>传统方法：冷启动问题，必须让大量真实学生作答</li>
+</ul>
+<blockquote>
+<p>需要一种能在缺少学生作答数据时预测难度的方法</p>
+</blockquote>
+<p>LLM的引入某种程度上可以解决这类问题</p>
+<blockquote>
+<p>经典开头</p>
+</blockquote>
+<p>但是<strong>解题能力与难度判断能力，是两种不同的能力。</strong></p>
+<p>因此研究问题为：<strong>LLM 的难度判断，能否与真实学生的困难程度对齐？</strong></p>
+<p>从两个设计出发：</p>
+<ul>
+<li>模型直接判断，考察模型对难度的感知</li>
+<li>模型自己做题，通过模型自身的解题能力去感知难度</li>
+</ul>
+<p>基于这样的设计，才能去寻找三种视角的gap</p>
+<blockquote>
+<p>学生实际觉得多难；</p>
+<p>模型判断学生会觉得多难；</p>
+<p>模型自己做起来有多难。</p>
+</blockquote>
+<p>作者给出了三个问题：</p>
+<ul>
+<li>模型是否有自己的难度认知（模型间是一致的，但是与学生存在gap）</li>
+<li>模型解题能力是否会妨碍理解学生</li>
+<li>模型能否通过角色扮演去弥补差距</li>
+</ul>
+<h3 id="exp">Exp</h3>
+<blockquote>
+<p>实验数据集都以各自形式标注了难度GT</p>
+</blockquote>
+<h4 id="模型直接预测难度">模型直接预测难度</h4>
+<table>
+  <thead>
+      <tr>
+          <th>提供的内容</th>
+          <th>具体含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>题目上下文 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">x_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></td>
+          <td>题干、可能附带的阅读材料、候选选项</td>
+      </tr>
+      <tr>
+          <td>正确答案 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>a</mi><mi>i</mi><mo>∗</mo></msubsup></mrow><annotation encoding="application/x-tex">a_i^*</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9474em;vertical-align:-0.2587em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6887em;"><span style="top:-2.4413em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2587em;"><span></span></span></span></span></span></span></span></span></span></td>
+          <td>直接告诉模型该题的标准答案</td>
+      </tr>
+      <tr>
+          <td>难度预测指令</td>
+          <td>要求模型估计题目难度</td>
+      </tr>
+      <tr>
+          <td>学生能力角色</td>
+          <td>本实验采用基线设置，不指定低、中、高能力学生角色</td>
+      </tr>
+  </tbody>
+</table>
+<p>计算经典的Spearman系数</p>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261029202853861.png"></p>
+<ul>
+<li>结论：模型预测的难度与学生实测难度之间存在差距</li>
+</ul>
+<p>同时这里就触发了一个额外问题</p>
+<ul>
+<li>模型和真实难度确实相关性弱</li>
+<li>但是模型对难度的感知是怎么样的分布？</li>
+</ul>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261029204030626.png"></p>
+<ul>
+<li>分布偏移：模型预测更集中低难度区域</li>
+<li>方差坍缩：模型预测集中在较窄的区间</li>
+</ul>
+<p>接下来继续探索，模型间的错误认知是否存在共同</p>
+<blockquote>
+<p>这里图太大了不截图了</p>
+</blockquote>
+<ul>
+<li>较强模型趋向于<strong>形成共同的难度判断</strong>，但这种判断并不充分符合学生实测难度。</li>
+</ul>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261029211133411.png"></p>
+<p>这里观察了一下让模型扮演不同水平的学生的结果</p>
+<blockquote>
+<p><strong>红色</strong>：比基线更好；</p>
+<p><strong>蓝色</strong>：比基线更差；</p>
+<p><strong>接近白色</strong>：变化较小</p>
+<p>基线是没有任何角色扮演的指示</p>
+</blockquote>
+<p>有效角色需要依赖模型和领域，论文没有找到一个普遍可靠的配置</p>
+<p>可能变好、可能变坏，与领域什么的都有关</p>
+<h4 id="模型做题">模型做题</h4>
+<p>根据模型实际答题表现推导出的难度</p>
+<p>让模型完成做题，得到的数据拟合一个IRT模型，从而估计难度</p>
+<p>最后计算Spearman系数</p>
+<blockquote>
+<p>核心问题：模型觉得难的问题，学生是否也觉得难？</p>
+</blockquote>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261029211714054.png"></p>
+<ul>
+<li>Domain数据集／领域</li>
+<li>IRT Global：用模型作答结果拟合出的 IRT 难度，与人类难度之间的相关系数</li>
+<li>Capacity Saturated：整体上，有多少题已经被绝大多数模型答对
+<ul>
+<li>90%模型都能答对的题目比例</li>
+</ul>
+</li>
+<li>Cognitive Divergence Savant：学生觉得难，但绝大多数模型能答对</li>
+<li>Cognitive Divergence Brittle：学生觉得简单，但多数模型答错</li>
+</ul>
+<p>核心：</p>
+<ul>
+<li><strong>人难机器易很常见，人易机器难则很少见。</strong></li>
+</ul>
+<p>因此直接让模型的解题能力去估算难度肯定不太行</p>
+<p>尝试让模型扮演不同水平学生去解题呢？</p>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261029212439012.png"></p>
+<ul>
+<li>角色名称并没有稳定地转化为相应的能力变化</li>
+<li>能力变化往往有限，而且<strong>方向、幅度缺乏一致性</strong></li>
+<li>即使模型真的答错更多，也要继续问：<strong>它犯的是不是学生会犯的错？</strong></li>
+</ul>
+<h4 id="模型能否预知自己会在哪些题上出错">模型能否预知自己会在哪些题上出错？</h4>
+<p>前面的实验关注模型是否理解<strong>学生的困难</strong>。最后这个实验转向模型自身</p>
+<p>这里需要验证的是：</p>
+<ul>
+<li>模型觉得某道题很难，那么是否他真的会在这道题上犯错概率更高</li>
+</ul>
+<p>需要验证<strong>难度判断</strong>和<strong>自身能力</strong>是否存在联系</p>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261029213047213.png"></p>
+<blockquote>
+<p>AUROC：ROC曲线下的面积</p>
+<p>随机抽一道模型答错的题，再抽一道模型答对的题，模型给错题更高难度分数的概率有多大？</p>
+</blockquote>
+<p>你会发现都在0.5多，所以没什么用啊</p>
+<table>
+  <thead>
+      <tr>
+          <th>AUROC</th>
+          <th>含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1.0</td>
+          <td>所有错题都排在所有对题的更难位置</td>
+      </tr>
+      <tr>
+          <td>0.5</td>
+          <td>与随机排序相当，难度分数无法有效区分对错</td>
+      </tr>
+      <tr>
+          <td>低于 0.5</td>
+          <td>排序倾向相反：错题反而被评得更简单</td>
+      </tr>
+  </tbody>
+</table>
+<ul>
+<li>多数模型的显式难度预测，与自身实际作答对错之间联系较弱
+<ul>
+<li>如果模型连自己的能力边界都难以判断，就缺少一个可靠的内部信号，来支撑它估计学生的困难</li>
+</ul>
+</li>
+</ul>
+<h2 id="llms-struggle-to-measure-what-distinguishes-students-of-different-proficiency-levels-a-study-of-item-discrimination-in-reading-comprehension-assessment">LLMs Struggle to Measure What Distinguishes Students of Different Proficiency Levels: A Study of Item Discrimination in Reading Comprehension Assessment</h2>
+<p><a href="https://arxiv.org/abs/2606.18709">2606.18709 LLMs Struggle to Measure What Distinguishes Students of Different Proficiency Levels: A Study of Item Discrimination in Reading Comprehension Assessment </a></p>
+<h3 id="intro-1">Intro</h3>
+<ul>
+<li>题目区分度（Item discrimination）：一道试题能在多大程度上把水平较高与水平较低的考生区分开来</li>
+</ul>
+<p><strong>“区分度”这个构念重要且与难度不同，现有 LLM 题目分析只覆盖了难度那一半，而用两条互补路径检验后发现，LLM 目前还测不了区分度</strong></p>
+<h3 id="exp-1">Exp</h3>
+<h4 id="zero-shot">Zero-shot</h4>
+<p>直接让模型输出一个连续值，预测当前题目的区分度</p>
+<blockquote>
+<p>42个模型，每个模型设置4种提示词条件：无学生角色、低能力学生、中等能力学生、高能力学生，共168种配置</p>
+</blockquote>
+<p>同时补充一个few-shot实验</p>
+<table>
+  <thead>
+      <tr>
+          <th>条件</th>
+          <th>输入内容</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>零样本</td>
+          <td>阅读文章、题干、选项、<strong>正确答案</strong>、CEFR等级、区分度定义，以及相应角色提示</td>
+      </tr>
+      <tr>
+          <td>少样本</td>
+          <td>上述内容＋示例题及其真实区分度</td>
+      </tr>
+  </tbody>
+</table>
+<p>CEFR可以理解为题目难度级别</p>
+<p>模型输出一个连续值，代表区分度</p>
+<p>指标计算使用真实标注值（区分度）进行</p>
+<p><img alt="结果" loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261027155543526.png"></p>
+<p><img alt="结果2" loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261027162615097.png"></p>
+<ul>
+<li>ρ：Spearman排序相关系数（大致就是按某个值排序，看一下两个数组差异），衡量两个变量之间的单调关系强度
+<ul>
+<li>取值-1到1，接近1是正相关，接近-1是负相关，0是不相关</li>
+<li>Overall：全部一起看</li>
+<li>Withiin-CEFR：单论每一级别的题目，进行内部的排序</li>
+</ul>
+</li>
+</ul>
+<p>为了实验的准确性，当前的ρ可能只依赖部分数据</p>
+<p>因此从120个阅读任务中，反复“有放回抽样”（bootstrap抽样）</p>
+<p><strong>每次抽完放回，因此任务可以重复出现，也可能完全没被抽中</strong></p>
+<p>每抽1次就重新计算一次ρ，最后得到的大量相关系数反应了样本波动对结果的影响</p>
+<br>
+<h4 id="先答题再预测">先答题再预测</h4>
+<p>由于区分度是让不同水平学生去答题的</p>
+<p>因此先让模型使用不同提示扮演不同学生去答题，再尝试预测</p>
+<p>这里的输入部分相较于之前<strong>不能有正确答案</strong></p>
+<br>
+<p>对于每个考生，我们可以计算：</p>
+<ul>
+<li>
+<p>它是否答对题A，记为0或1</p>
+</li>
+<li>
+<p>它在**其他同级别题目（比如说指定B2）**上的答对总数</p>
+</li>
+</ul>
+<p>从而计算出 <strong>item-rest correlation，题目与其余题目得分的相关性</strong></p>
+<blockquote>
+<p>毕竟这里比zero-shot带来了更丰富的大量做题信息</p>
+</blockquote>
+<p>每道题的item-rest相关系数，作为该题的<strong>预测区分度</strong></p>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_problem/assets/image-20261027162657214.png"></p>
+<p>实验证明：比直接预测更好，但效果有限</p>
+<p>同时补了一个实验，试图证明：<strong>即使数值不准，能不能帮助找出低区分度题</strong></p>
+<blockquote>
+<p>评价最低20%的题目时：</p>
+<ol>
+<li>根据真实区分度，找出真正最低的20%；</li>
+<li>根据预测值，也找出预测最低的20%；</li>
+<li>看真正目标题中，有多少被预测名单找回。</li>
+</ol>
+</blockquote>
+<p>最终结果：</p>
+<table>
+  <thead>
+      <tr>
+          <th>筛查任务</th>
+          <th>找回比例</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>找出真实最低10%的题目</td>
+          <td>36.7%</td>
+      </tr>
+      <tr>
+          <td>找出真实最低20%的题目</td>
+          <td>37.7%</td>
+      </tr>
+  </tbody>
+</table>
+<p>也就那样</p>
+<h4 id="conclusion">Conclusion</h4>
+<p>直接读结论就好</p>
+<ul>
+<li>LLM能解题，不代表能判断一道题是否有区分度</li>
+<li>从答题行为计算区分度，比直接让模型报数更有效，但仍不足以替代预试</li>
+</ul>
+<hr>
+<p>但是还有一些值得注意的结论</p>
+<ul>
+<li>模型较能判断“哪个错误选项有吸引力”</li>
+</ul>
+<blockquote>
+<p>模型与人类的干扰项选择比例相关性为 <strong>0.315</strong>，但干扰项区分度相关性只有 <strong>0.086</strong></p>
+</blockquote>
+<h2 id="the-easy-trap-why-llms-underestimate-misconception-driven-difficulty">The “Easy Trap”: Why LLMs Underestimate Misconception-Driven Difficulty</h2>
+<p><a href="https://arxiv.org/abs/2607.26067">19th Educational Data Mining Conference - 2607.26067 -  The Easy Trap: Why LLMs Underestimate Misconception-Driven Difficulty</a></p>
+<h3 id="intro-2">Intro</h3>
+<ul>
+<li>大语言模型的判断往往更贴近课程对学生表现的预期</li>
+<li></li>
+</ul>
+]]></content:encoded></item><item><title>论文阅读高手 · 教育论文笔记（三）· 学生模拟 · Review1</title><link>https://biribiribird.top/posts/edu_agent_simulated_student_review_1/</link><pubDate>Fri, 09 Oct 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/edu_agent_simulated_student_review_1/</guid><description>&lt;p&gt;[TOC]&lt;/p&gt;
+&lt;h2 id="towards-valid-student-simulation-with-large-language-models"&gt;Towards Valid Student Simulation with Large Language Models&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://arxiv.org/pdf/2601.05473"&gt;Towards Valid Student Simulation with Large Language Models&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="intro"&gt;Intro&lt;/h3&gt;
+&lt;p&gt;教育创新严重受限于真人参与，因此“学生模拟”非常关键&lt;/p&gt;
+&lt;p&gt;“学生模拟”已有很长历史，LLM逐渐用作模拟学生的底层&lt;/p&gt;
+&lt;p&gt;但是&lt;strong&gt;模型说的像学生，不代表其思考、学习过程像学生&lt;/strong&gt;&lt;/p&gt;</description><content:encoded><![CDATA[<p>[TOC]</p>
+<h2 id="towards-valid-student-simulation-with-large-language-models">Towards Valid Student Simulation with Large Language Models</h2>
+<p><a href="https://arxiv.org/pdf/2601.05473">Towards Valid Student Simulation with Large Language Models</a></p>
+<h3 id="intro">Intro</h3>
+<p>教育创新严重受限于真人参与，因此“学生模拟”非常关键</p>
+<p>“学生模拟”已有很长历史，LLM逐渐用作模拟学生的底层</p>
+<p>但是<strong>模型说的像学生，不代表其思考、学习过程像学生</strong></p>
+<ul>
+<li>模型的表述虽然很自然，不一定符合真实学生的认知规律</li>
+<li>能力悖论：让一个知道答案的模型，表现为“尚未掌握知识的学习者”
+<ul>
+<li>模型能力与学生状态不匹配：学生缺乏概念，而模型能够潜在调用相关知识</li>
+</ul>
+</li>
+</ul>
+<p>需要明确：学生当前<strong>知道什么、不知道什么</strong>，<strong>能使用哪些策略</strong>，以及接受教学后这些<strong>状态应当如何变化</strong>。</p>
+<p>定义三个规范：</p>
+<ul>
+<li>能够获取什么？概念、策略、资源……</li>
+<li>为什么犯错？知识缺口、错误概念……</li>
+<li>状态如何变化？知识、策略的变化</li>
+</ul>
+<p>两个组织维度：</p>
+<ul>
+<li>行为目标：想模拟学生的什么？学习过程、表现……</li>
+<li>环境：在什么环境下模拟谁</li>
+</ul>
+<p>这决定了真实模拟是否有效</p>
+<blockquote>
+<p>这段不只是说“LLM 有时模拟得不好”，而是在解释：<strong>问题出在生成行为缺少学习者状态的约束，因此解决方案也必须落实到状态及其变化机制上</strong></p>
+</blockquote>
+<br>
+<br>
+<h3 id="related">Related</h3>
+<h4 id="传统学生模拟">传统学生模拟</h4>
+<p>程序化一个错误模式，这种方法比较白箱，能够轻易看出学生为什么这么做</p>
+<ul>
+<li>
+<p><strong>ACT-R</strong>：用来搭建“思考过程”的工具框架。</p>
+</li>
+<li>
+<p><strong>SimStudent、Apprentice Learner</strong>：能从示范、反馈中学习技能的系统。</p>
+</li>
+</ul>
+<p>但是研究者需要设计很多细节：分数计算还比较容易，模拟一个学生写作文、参与课堂讨论，就复杂得多</p>
+<h4 id="llm">LLM</h4>
+<p>LLM的出现让交互更为灵活</p>
+<ul>
+<li>
+<p><strong>直接扮演</strong>：主要靠提示词告诉模型“你是什么样的学生”。</p>
+</li>
+<li>
+<p><strong>结合状态控制</strong>：明确记录“学生现在会什么”，约束模型回答，并规定教学后怎样更新。</p>
+</li>
+</ul>
+<p><strong>但模拟的效度仍取决于对学习者状态与学习动态的明确规定</strong></p>
+<p>模型不一定会完全遵循当前的学习者状态，可能使用了超出学习者水平的知识</p>
+<br>
+<br>
+<h3 id="formalizing">Formalizing</h3>
+<h4 id="学生模拟的评估">学生模拟的评估</h4>
+<p>根据能力悖论，LLM没法清除掉自己本身掌握的内容，因此可能会潜在影响后续的生成</p>
+<p>因此必须考核三个内容：</p>
+<ul>
+<li>错误保真Fidelity of Error：给定一个target misconception，模拟器应在与之相关的问题类型上一致地应用它</li>
+<li>认知一致性Epistemic Consistency：生成的错误和解释应可因果地归因于所声明的认知边界，并在同构项目之间以及多轮互动中保持稳定，而不是表现为与专家推理之间的一次性表面偏差</li>
+<li>能力边界Boundary of Competence：在这些区域之外，模拟器仍应按照其假定的能力水平行事，避免既出现泄露不可及知识的专家捷径，又退化为随机噪声。（整体表现符合设定水平，不适用超出能力范围的方法）</li>
+</ul>
+<blockquote>
+<p>前两个的区别：</p>
+<ul>
+<li>错误保真度看<strong>有没有复现指定错误</strong>（单次表现的层面）</li>
+<li>认知一致性看<strong>这些回答能否由同一个学习者状态解释</strong>（多次表现之间的层面）</li>
+</ul>
+</blockquote>
+<br>
+<h4 id="模拟目标">模拟目标</h4>
+<p>模拟学生之间不能一概而论，一起评价，而是需要根据：</p>
+<ul>
+<li>行为目标Behavioral Goals</li>
+<li>环境Environment</li>
+</ul>
+<h5 id="行为目标behavioral-goals">行为目标Behavioral Goals</h5>
+<table>
+  <thead>
+      <tr>
+          <th>行为目标</th>
+          <th>主要关心什么</th>
+          <th>可以怎样理解</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>模拟表现</td>
+          <td>某个时点的回答、正确率和错误模式</td>
+          <td>给定这些题，这类学生会怎样答？</td>
+      </tr>
+      <tr>
+          <td>模拟学习</td>
+          <td>接受教学后，能力如何随时间变化</td>
+          <td>教了之后，学生怎样进步、遗忘或继续犯错？</td>
+      </tr>
+      <tr>
+          <td>模拟人类特征</td>
+          <td>情绪、动机、人格和交互风格</td>
+          <td>学生遇到困难时，会怎样参与互动？</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p>这三类目标可以同时存在，作者不是要求每个系统只能选一种，而是<strong>要求研究者明确自己主要声称模拟了什么</strong></p>
+</blockquote>
+<ul>
+<li>表现：模拟器能准确产生“当前水平学生常见的错误”</li>
+<li>学习：模拟“这些学生接受教学后如何变化”</li>
+<li>人类特征：学生不只是一个答题机器</li>
+</ul>
+<h5 id="环境environment">环境Environment</h5>
+<ul>
+<li>学科</li>
+<li>学生群体与角色</li>
+<li>学习环境与交互的模态</li>
+</ul>
+<br>
+<p>总而言之，做学生模拟，必须声明：目标 × 环境</p>
+<h4 id="认知状态规范">认知状态规范</h4>
+<p>要求研究者说明：</p>
+<blockquote>
+<p>学生当前能用什么知识？错误来自什么理解？接受教学后，状态按什么机制改变？</p>
+</blockquote>
+<hr>
+<p>这篇大概了解一下就好</p>
+<p>不往下看了 力竭了</p>
+<h2 id="agent4edu-generating-learner-response-data-by-generative-agents-for-intelligent-education-systems">Agent4Edu: Generating Learner Response Data by Generative Agents for Intelligent Education Systems</h2>
+<p><a href="https://arxiv.org/pdf/2501.10332">Agent4Edu: Generating Learner Response Data by Generative Agents for Intelligent Education Systems - AAAI 2025</a></p>
+<h3 id="intro-1">Intro</h3>
+<p>个性化学习可以针对学生历史的答题信息推荐新题</p>
+<p>但是推荐新题的有效性取决于能否获取丰富的有效的高质量作答数据</p>
+<ul>
+<li>离线数据稀缺</li>
+<li>离线数据与在线练习之间可能存在gap</li>
+</ul>
+<p>学生模拟作答提供了一定的帮助，但是：</p>
+<ul>
+<li>模拟过程过于简单：仅预测作答结果，没有充分利用解答过程</li>
+<li>依赖真实数据：现有方法仍然需要较多的真实数据，没有解决数据问题</li>
+</ul>
+<p>大语言模型的zero-shot能力了极具前景</p>
+<h3 id="method">Method</h3>
+<p><img loading="lazy" src="/posts/edu_agent_simulated_student_review_1/assets/image-20261022205205889.png"></p>
+<h4 id="learner-profile">Learner Profile</h4>
+<blockquote>
+<p>构造总体情况</p>
+</blockquote>
+<ul>
+<li>输入
+<ul>
+<li>已做过的题、对应知识点、作答结果（对/错）</li>
+</ul>
+</li>
+<li>输出
+<ul>
+<li>活跃度：题目数</li>
+<li>多样性：知识点数</li>
+<li>正确率：比例</li>
+<li>偏好：知识点分布</li>
+<li><strong>解题能力：IRT模型</strong></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>前四项代码写死 即可完成统计</p>
+</blockquote>
+<p>由于做的题不同，正确率并不能反映水平</p>
+<ul>
+<li>简单题高正确率</li>
+<li>复杂题低正确率</li>
+</ul>
+<p>无法判断两者能力优劣</p>
+<br>
+<p>项目反应理论（Item Response Theory）的核心假设：学生答对一道题的概率，同时取决于<strong>学生能力</strong>和<strong>题目难度</strong>。</p>
+<p>论文使用的公式是：<br>
+</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mrow><mi>u</mi><mo separator="true">,</mo><mi>e</mi></mrow></msub><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mi>exp</mi><mo>⁡</mo><mrow><mo fence="true">[</mo><mo>−</mo><mo stretchy="false">(</mo><msub><mi>θ</mi><mi>u</mi></msub><mo>−</mo><msub><mi>b</mi><mi>e</mi></msub><mo stretchy="false">)</mo><mo fence="true">]</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\hat y_{u,e} = \frac{1}{1+\exp\left [ -(\theta_u -b_e)\right ]}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">u</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.2574em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mop">exp</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">[</span><span class="mord">−</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">u</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">e</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mclose delimcenter" style="top:0em;">]</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>θ</mi><mi>u</mi></msub></mrow><annotation encoding="application/x-tex">\theta_u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">u</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：学生<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span>的能力</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mi>e</mi></msub></mrow><annotation encoding="application/x-tex">b_e</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">e</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：题目<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi></mrow><annotation encoding="application/x-tex">e</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">e</span></span></span></span>的难度</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1944em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1944em;"><span></span></span></span></span></span></span></span></span>：预测答对题目的概率</li>
+</ul>
+<blockquote>
+<p>描述了<strong>能力相对难度</strong>，与答对概率的关系</p>
+<p>难度相当（值为0），概率为50%</p>
+</blockquote>
+<p>这里使用了真实的历史数据，去拟合了参数模型</p>
+<hr>
+<p>最后将所有数值进行分档：</p>
+<table>
+  <thead>
+      <tr>
+          <th>特征</th>
+          <th>附录中的分档规则</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>活跃度</td>
+          <td>根据全体学习者的中位数划分为高、低</td>
+      </tr>
+      <tr>
+          <td>多样性</td>
+          <td>根据全体学习者的中位数划分为高、低</td>
+      </tr>
+      <tr>
+          <td>正确率</td>
+          <td>将学习者按数值排序，按人数等分为低、中、高三组</td>
+      </tr>
+      <tr>
+          <td>能力</td>
+          <td>将学习者按能力值排序，按人数等分为低、中、高三组</td>
+      </tr>
+      <tr>
+          <td>偏好</td>
+          <td>直接保留最常练习的知识点名称</td>
+      </tr>
+  </tbody>
+</table>
+<p>构造提示词：</p>
+<blockquote>
+<p>你是一名在在线学习平台上自主练习的高中生。你的练习活跃度较低，练习不够规律，学习热情较低。你练习的知识类别较少，主要集中在有限的知识范围。你最常练习的知识点是几何。你的作答正确率较低，分析与解题能力一般。</p>
+</blockquote>
+<h4 id="memory">Memory</h4>
+<blockquote>
+<p>构造最近的情况</p>
+</blockquote>
+<p>首先分为三类记忆</p>
+<table>
+  <thead>
+      <tr>
+          <th>记忆类型</th>
+          <th>保存什么</th>
+          <th>作用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>事实记忆</td>
+          <td>已观察到的全部作答记录，以及每条记录的强化计数</td>
+          <td>完整档案，供系统管理和筛选</td>
+      </tr>
+      <tr>
+          <td>短期记忆</td>
+          <td>最近几条作答记录</td>
+          <td>保留近期表现的细节</td>
+      </tr>
+      <tr>
+          <td>长期记忆</td>
+          <td>反复强化的记录、知识熟练度、学习状态总结</td>
+          <td>保留重要经历和概括性认识</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p>Agent实际只读取整理后的短期记忆和长期记忆</p>
+</blockquote>
+<h5 id="facts">Facts</h5>
+<p>每一条新记录插入记忆（事实记忆）：</p>
+<ul>
+<li>做了哪道题、题目内容、知识点、答对还是答错</li>
+<li>强化计数器<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span>：初始值为1
+<ul>
+<li>描述被几次相关练习强化过</li>
+<li>RCD 的知识概念图工具：判断记录是否相关，不通过LLM</li>
+</ul>
+</li>
+</ul>
+<h5 id="short-term">Short-Term</h5>
+<p>更新短期记忆：</p>
+<ul>
+<li>设定<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">s=5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>，取最近的<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">s</span></span></span></span>​条数据即可</li>
+</ul>
+<h5 id="long-term">Long-Term</h5>
+<p>这里是三类数据</p>
+<ul>
+<li>强化事实：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span>超过一定阈值<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi></mrow><annotation encoding="application/x-tex">F</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">F</span></span></span></span>的数据</li>
+<li>知识熟练度：通过DNeuralCDM估计学生在当前时刻，对不同知识点分别掌握到什么程度。
+<ul>
+<li>例如：几何：good（0.7800）；函数：poor（0.2100）；……</li>
+<li>按当步学习者的数值排序，等比例划分高、中、低档。提示词使用 <code>good / common / poor</code>；缺少信息时可以写 <code>unknown</code>。</li>
+</ul>
+</li>
+<li>学习状态：将学习者画像、短期记忆、长期记忆、上一次学习状态，送入LLM，输出</li>
+</ul>
+<br>
+<p>这里对于记忆有一个遗忘机制，当练习步数服从一个<code>sigmoid</code>函数超出阈值后，把这题从长期记忆中删除，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span>设为1</p>
+<h4 id="action">Action</h4>
+<blockquote>
+<p>“以这个学生当前的状态，面对这道题，他会怎么表现？”</p>
+</blockquote>
+<table>
+  <thead>
+      <tr>
+          <th>输入</th>
+          <th>来源</th>
+          <th>提供什么信息</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>学习者画像</td>
+          <td>画像模块</td>
+          <td>整体能力、活跃度、正确率、偏好等</td>
+      </tr>
+      <tr>
+          <td>短期记忆</td>
+          <td>记忆模块</td>
+          <td>最近几次练习的题目与对错</td>
+      </tr>
+      <tr>
+          <td>长期记忆</td>
+          <td>记忆模块</td>
+          <td>强化记录、知识熟练度、学习状态总结</td>
+      </tr>
+      <tr>
+          <td>当前习题</td>
+          <td>学习环境</td>
+          <td>题目内容，以及可用的选项、参考答案、解析等</td>
+      </tr>
+  </tbody>
+</table>
+<ul>
+<li>Task1：判断学生是否愿意做
+<ul>
+<li>Yes/No</li>
+</ul>
+</li>
+<li>Task2：学生能否识别考点
+<ul>
+<li>两个干扰项一个正确答案</li>
+</ul>
+</li>
+<li>Task3：生成解题思路和最终答案</li>
+<li>Task4：预测学生是否能做对Yes/No</li>
+</ul>
+<hr>
+<p>后面没什么好看的，用这个模拟学生不断做题循环</p>
+]]></content:encoded></item><item><title>论文阅读高手 · 教育论文笔记（二）· Benchmark</title><link>https://biribiribird.top/posts/edu_agent_paper_review_benchmark/</link><pubDate>Thu, 08 Oct 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/edu_agent_paper_review_benchmark/</guid><description>&lt;p&gt;[TOC]&lt;/p&gt;
 &lt;h2 id="longtutor-benchmarking-large-language-models-for-long-term-personalized-tutoring"&gt;LongTutor: Benchmarking Large Language Models for Long-term Personalized Tutoring&lt;/h2&gt;
 &lt;p&gt;&lt;a href="https://aclanthology.org/2026.acl-long.1371/"&gt;LongTutor: Benchmarking Large Language Models for Long-term Personalized Tutoring - ACL Anthology&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="idea"&gt;Idea&lt;/h3&gt;
@@ -268,7 +1437,19 @@ S=[h_1,h_2,\ldots,h_{199},q_{\text{current}}]
 <ul>
 <li>HTTP：默认80端口</li>
 <li>HTTPS：默认443</li>
+<li>SSH：22</li>
 </ul>
+<h2 id="nginx">Nginx</h2>
+<p>linux下的目录是有约定俗成的习惯</p>
+<ul>
+<li><code>/usr/bin</code>：用户的可执行程序(binary)</li>
+<li><code>/etc</code>：软件配置文件</li>
+<li><code>/var/www/</code>：网站文件</li>
+<li><code>/var/log</code>：日志文件</li>
+</ul>
+<blockquote>
+<p><code>/var</code> 是 <strong>Variable</strong>（可变的）的缩写。它专门用来存放系统运行过程中<strong>经常变化</strong>的数据</p>
+</blockquote>
 ]]></content:encoded></item><item><title>杂谈 · 生产力 · 微信与Codex的连携技能</title><link>https://biribiribird.top/posts/tittle-tattle-wechatgpt/</link><pubDate>Fri, 24 Jul 2026 00:00:00 +0000</pubDate><guid>https://biribiribird.top/posts/tittle-tattle-wechatgpt/</guid><description>&lt;p&gt;核心贡献：解决了吃饭的时候没法编程的问题&lt;/p&gt;
 &lt;p&gt;以及摸鱼的时候不能干活的问题&lt;/p&gt;
 &lt;p&gt;以及在微信端可切换codex和claude code，感觉work&lt;/p&gt;
